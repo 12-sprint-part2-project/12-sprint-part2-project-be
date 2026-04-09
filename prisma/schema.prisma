@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,4 +5,97 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Theme {
+  GREEN
+  YELLOW
+  BLUE
+  PINK
+  DESK1
+  DESK2
+  TILE
+  LEAF
+}
+
+enum FocusStatus {
+  running
+  paused
+  completed
+}
+
+model Study {
+  id           Int            @id @default(autoincrement())
+  nickname     String
+  title        String
+  description  String?
+  theme        Theme
+  password     String
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  habits        Habit[]
+  focusSessions FocusSession[]
+  emojis        Emoji[]
+
+  @@map("studies")
+}
+
+model Habit {
+  id        Int       @id @default(autoincrement())
+  studyId   Int       @map("study_id")
+  habitName String    @map("habit_name")
+  startAt   DateTime  @map("start_at")
+  endAt     DateTime? @map("end_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  study     Study      @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  habitLogs HabitLog[]
+
+  @@map("habits")
+}
+
+model HabitLog {
+  id          Int       @id @default(autoincrement())
+  habitId     Int       @map("habit_id")
+  logDate     DateTime  @map("log_date") @db.Date
+  loggedAt    DateTime  @map("logged_at")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  habit       Habit     @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, logDate])
+  @@map("habit_logs")
+}
+
+model FocusSession {
+  id          Int         @id @default(autoincrement())
+  studyId     Int         @map("study_id")
+  startTime   DateTime    @default(now()) @map("start_time")
+  endTime     DateTime    @map("end_time")
+  durationMin Int         @map("duration_min")
+  pausedAt    DateTime?   @map("paused_at")
+  status      FocusStatus
+  earnedPoint Int         @default(0) @map("earned_point")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  study       Study       @relation(fields: [studyId], references: [id], onDelete: Cascade)
+
+  @@map("focus_sessions")
+}
+
+model Emoji {
+  id        Int      @id @default(autoincrement())
+  studyId   Int      @map("study_id")
+  emoji     String
+  count     Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  study     Study    @relation(fields: [studyId], references: [id], onDelete: Cascade)
+
+  @@unique([studyId, emoji])
+  @@map("emojis")
 }
