@@ -64,7 +64,6 @@ CREATE TABLE "emojis" (
     "id" SERIAL NOT NULL,
     "study_id" INTEGER NOT NULL,
     "emoji" TEXT NOT NULL,
-    "count" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "emojis_pkey" PRIMARY KEY ("id")
