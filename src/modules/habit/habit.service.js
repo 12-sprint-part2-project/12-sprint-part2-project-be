@@ -1,5 +1,6 @@
 export const getTodayHabits = async (studyId) => {};
 export const createHabit = async (studyId, data) => {};
-export const updateHabit = async (id, data) => {};
-export const deleteHabit = async (id) => {};
+export const toggleHabit = async (studyId, habitId, completed) => {};
+export const updateHabit = async (studyId, habitId, data) => {};
+export const deleteHabit = async (studyId, habitId) => {};
 export const getWeeklyLogs = async (studyId, date) => {};
