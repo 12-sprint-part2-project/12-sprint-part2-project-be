@@ -1,5 +1,7 @@
 ## <!-- feature.md -->
 
+---
+
 name: 기능 구현
 about: 새로운 기능 개발
 title: "[Feat] 기능 구현"
