@@ -9,6 +9,10 @@ export const createHabit = asyncHandler(async (req, res) => {
   res.status(201).json({ message: "TODO" });
 });
 
+export const toggleHabit = asyncHandler(async (req, res) => {
+  res.status(200).json({ message: "TODO" });
+});
+
 export const updateHabit = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "TODO" });
 });
