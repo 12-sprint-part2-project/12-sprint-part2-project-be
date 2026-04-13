@@ -1,5 +1,4 @@
 import * as studyService from "./study.service.js";
-import * as studyService from "./study.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
 
 export const getStudies = asyncHandler(async (req, res) => {
@@ -24,4 +23,8 @@ export const deleteStudy = asyncHandler(async (req, res) => {
 
 export const verifyPassword = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "TODO" });
+});
+
+export const addEmoji = asyncHandler(async (req, res) => {
+  res.status(201).json({ message: "TODO" });
 });

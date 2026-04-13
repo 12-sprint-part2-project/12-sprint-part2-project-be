@@ -9,5 +9,6 @@ router.get("/:id", studyController.getStudyById);
 router.patch("/:id", studyController.updateStudy);
 router.delete("/:id", studyController.deleteStudy);
 router.post("/:id/verify-password", studyController.verifyPassword);
+router.post("/:id/emojis", studyController.addEmoji);
 
 export default router;

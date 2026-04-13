@@ -16,3 +16,7 @@ export const updateHabit = asyncHandler(async (req, res) => {
 export const deleteHabit = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
+
+export const getWeeklyLogs = asyncHandler(async (req, res) => {
+  res.status(200).json({ message: "TODO" });
+});

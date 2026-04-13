@@ -4,3 +4,4 @@ export const getStudyById = async (id) => {};
 export const updateStudy = async (id, data) => {};
 export const deleteStudy = async (id) => {};
 export const verifyPassword = async (id, password) => {};
+export const addEmoji = async (studyId, emoji) => {};

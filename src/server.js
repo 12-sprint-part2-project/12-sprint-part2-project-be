@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import studyRouter from "./modules/study/study.routes.js";
 import habitRouter from "./modules/habit/habit.routes.js";
+import habitLogRouter from "./modules/habit/habit-log.routes.js";
 import focusRouter from "./modules/focus/focus.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 app.use("/studies", studyRouter);
 app.use("/studies/:studyId/habits", habitRouter);
+app.use("/studies/:studyId/habit-logs", habitLogRouter);
 app.use("/studies/:studyId/focus-sessions", focusRouter);
 
 app.use(errorHandler);
