@@ -5,7 +5,7 @@ import studyRouter from "./modules/study/study.routes.js";
 import habitRouter from "./modules/habit/habit.routes.js";
 import habitLogRouter from "./modules/habit/habit-log.routes.js";
 import focusRouter from "./modules/focus/focus.routes.js";
-import errorHandler from "./middleware/errorHandler.js";
+import errorHandler from "./common/middlewares/errorHandler.js";
 
 dotenv.config();
 

@@ -1,5 +1,5 @@
-import { ERROR_CODES } from "../errors/errorCodes.js";
-import { AppError } from "../errors/CustomError.js";
+import { ERROR_CODES } from "../../errors/errorCodes.js";
+import { AppError } from "../../errors/CustomError.js";
 
 const PRISMA_ERROR_MAP = {
   P2025: {
