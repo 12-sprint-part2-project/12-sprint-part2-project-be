@@ -54,6 +54,9 @@ export const updateStudy = asyncHandler(async (req, res) => {
 
 export const deleteStudy = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  if (isNaN(id)) {
+    throw new BadRequestError("id는 숫자여야 합니다.");
+  }
   await studyService.deleteStudy(id);
 
   res.status(204).send();
