@@ -35,7 +35,10 @@ export const getStudyById = asyncHandler(async (req, res) => {
 export const updateStudy = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { title, description, theme, password, nickname } = req.body;
-
+  if (isNaN(id)) {
+    //이건 api 명세서엔 작성 안되었던건데, delete엔 했으므로 얘도 일단 해줌.. TODO: api명세서 오류 파트에 id숫자 검증 작성하기
+    throw new BadRequestError("id는 숫자여야 합니다.");
+  }
   if (!title || !theme || !password || !nickname) {
     throw new BadRequestError(
       "스터디 수정에 실패했습니다. 유효하지 않은 입력값입니다.",
