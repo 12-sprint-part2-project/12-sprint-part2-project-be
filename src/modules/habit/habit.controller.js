@@ -6,7 +6,17 @@ export const getTodayHabits = asyncHandler(async (req, res) => {
 });
 
 export const createHabit = asyncHandler(async (req, res) => {
-  res.status(201).json({ message: "TODO" });
+  const studyId = Number(req.params.studyId);
+  const { habitName } = req.body;
+  const newHabit = await habitService.createHabit({
+    studyId,
+    habitName,
+  });
+
+  res.status(201).json({
+    success: true,
+    data: newHabit,
+  });
 });
 
 export const toggleHabit = asyncHandler(async (req, res) => {
