@@ -22,5 +22,15 @@ export const deleteStudy = async (id) => {
   });
   return res;
 };
-export const verifyPassword = async (id, password) => {};
+export const verifyPassword = async (id, password) => {
+  //prisma로, 해당하는 id의 스터디를 가져온다. (password필드만 셀렉해서 가져옴.)
+  const study = await prisma.study.findUniqueOrThrow({
+    where: { id: Number(id) },
+    select: { password: true },
+  });
+  //가져온 study의 password필드를 주어진 password와 비교한다.
+  const isCorrect = study.password === password;
+  //일치하는지에 대한 boolean값을 리턴함.
+  return isCorrect;
+};
 export const addEmoji = async (studyId, emoji) => {};
