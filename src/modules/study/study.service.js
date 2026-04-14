@@ -1,6 +1,4 @@
-import { prisma } from "../../lib/prisma";
-
-const prisma = new PrismaClient();
+import prisma from "../../lib/prisma.js";
 
 export const getStudies = async () => {};
 export const createStudy = async (data) => {
