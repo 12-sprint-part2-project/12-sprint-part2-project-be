@@ -36,6 +36,12 @@ export const updateStudy = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { title, description, theme, password, nickname } = req.body;
 
+  if (!title || !theme || !password || !nickname) {
+    throw new BadRequestError(
+      "스터디 수정에 실패했습니다. 유효하지 않은 입력값입니다.",
+    );
+  }
+  //id 검증은 프리즈마에서 알아서 해준다고 함!
   const updatedStudy = await studyService.updateStudy(id, {
     title,
     description,

@@ -12,14 +12,14 @@ export const createStudy = async (data) => {
 export const getStudyById = async (id) => {};
 export const updateStudy = async (id, data) => {
   const res = await prisma.studies.update({
-    where: { id },
+    where: { id: Number(id) },
     data,
   });
   return res;
 };
 export const deleteStudy = async (id) => {
   const res = await prisma.studies.delete({
-    where: { id },
+    where: { id: Number(id) },
   });
   return res;
 };
