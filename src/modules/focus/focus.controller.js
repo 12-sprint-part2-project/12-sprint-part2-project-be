@@ -10,7 +10,7 @@ export const getSession = asyncHandler(async (req, res) => {
     throw new FocusNotFoundError("해당 studyId로 등록된 데이터 미존재");
 
   if (focus.status === "completed") {
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: null,
     });
