@@ -1,4 +1,8 @@
 import prisma from "../../lib/prisma.js";
+import {
+  BadRequestError,
+  StudyNotFoundError,
+} from "../../errors/CustomError.js";
 
 export const getTodayHabits = async (studyId) => {
   // 오늘 날짜 (시간 제거)
@@ -30,28 +34,26 @@ export const getTodayHabits = async (studyId) => {
 export const createHabit = async (studyId, data) => {
   const { habitName } = data;
 
+  // 1. studyId 검증
   if (!studyId || Number.isNaN(studyId)) {
-    const error = new Error("유효하지 않은 스터디 ID입니다.");
-    error.status = 400;
-    throw error;
+    throw new BadRequestError("유효하지 않은 스터디 ID입니다.");
   }
 
+  // 2. habitName 검증
   if (!habitName || !habitName.trim()) {
-    const error = new Error("습관 이름은 필수입니다.");
-    error.status = 400;
-    throw error;
+    throw new BadRequestError("습관 이름은 필수입니다.");
   }
 
-  try {
-    await prisma.study.findUniqueOrThrow({
-      where: { id: studyId },
-    });
-  } catch (err) {
-    const error = new Error("존재하지 않는 스터디입니다.");
-    error.status = 404;
-    throw error;
+  // 3. study 존재 여부 확인
+  const study = await prisma.study.findUnique({
+    where: { id: studyId },
+  });
+
+  if (!study) {
+    throw new StudyNotFoundError();
   }
 
+  // 4. 생성
   const newHabit = await prisma.habit.create({
     data: {
       studyId,
