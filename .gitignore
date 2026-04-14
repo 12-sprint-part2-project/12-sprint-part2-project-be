@@ -3,3 +3,6 @@ node_modules
 .env
 
 /generated/prisma
+
+# 로컬 테스트용 더미 데이터 (팀 공유 불필요)
+prisma/seed.js
