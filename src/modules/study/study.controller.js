@@ -52,7 +52,7 @@ export const updateStudy = asyncHandler(async (req, res) => {
     password,
     nickname,
   });
-  res.status(201).json({ success: true, data: updatedStudy });
+  res.status(200).json({ success: true, data: updatedStudy });
 });
 
 export const deleteStudy = asyncHandler(async (req, res) => {

@@ -4,7 +4,6 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../../generated/prisma/index.js";
 
 dotenv.config();
-
 const globalForPrisma = globalThis;
 
 const createPrismaClient = () => {
