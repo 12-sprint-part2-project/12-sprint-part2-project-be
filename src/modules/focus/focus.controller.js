@@ -1,3 +1,4 @@
+import { FocusNotFoundError } from "../../errors/CustomError.js";
 import * as focusService from "./focus.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
 
@@ -5,15 +6,10 @@ export const getSession = asyncHandler(async (req, res) => {
   const studyId = Number(req.params.studyId);
   const focus = await focusService.getSession(studyId);
 
-  if (!focus) {
-    res.status(404).json({
-      success: false,
-      code: "NOT_FOUND",
-      message: "해당 studyId로 등록된 데이터 미존재",
-    });
-  }
+  if (!focus)
+    throw new FocusNotFoundError("해당 studyId로 등록된 데이터 미존재");
 
-  if (focus.status == "completed") {
+  if (focus.status === "completed") {
     res.status(200).json({
       success: true,
       data: null,

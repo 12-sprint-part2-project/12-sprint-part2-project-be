@@ -1,3 +1,5 @@
+import prisma from "../../lib/prisma.js";
+
 export const getSession = async (studyId) => {
   const focus = await prisma.FocusSession.findFirst({
     where: {
