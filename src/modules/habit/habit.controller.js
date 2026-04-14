@@ -8,8 +8,7 @@ export const getTodayHabits = asyncHandler(async (req, res) => {
 export const createHabit = asyncHandler(async (req, res) => {
   const studyId = Number(req.params.studyId);
   const { habitName } = req.body;
-  const newHabit = await habitService.createHabit({
-    studyId,
+  const newHabit = await habitService.createHabit(studyId, {
     habitName,
   });
 
