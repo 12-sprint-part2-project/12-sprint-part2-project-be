@@ -66,7 +66,16 @@ export const deleteStudy = asyncHandler(async (req, res) => {
 });
 
 export const verifyPassword = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: "TODO" });
+  const { id } = req.params;
+  const { password } = req.body;
+  if (isNaN(id)) {
+    throw new BadRequestError("id는 숫자여야 합니다.");
+  }
+  const isCorrect = await studyService.verifyPassword(id, password); //boolean값을 리턴 받는다. true면 일치, false면 불일치.
+  if (!isCorrect) {
+    throw new BadRequestError("비밀번호가 올바르지 않습니다.");
+  }
+  res.status(200).json({ succss: true });
 });
 
 export const addEmoji = asyncHandler(async (req, res) => {
