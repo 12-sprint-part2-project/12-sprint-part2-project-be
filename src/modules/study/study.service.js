@@ -31,6 +31,7 @@ export const getStudyById = async (id) => {
         },
       },
       focusSessions: {
+        where: { status: "completed" },
         select: {
           earnedPoint: true,
         },
