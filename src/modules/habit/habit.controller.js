@@ -36,7 +36,20 @@ export const toggleHabit = asyncHandler(async (req, res) => {
 });
 
 export const updateHabit = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: "TODO" });
+  const studyId = Number(req.params.studyId);
+  const habitId = Number(req.params.habitId);
+
+  const { habitName, startAt } = req.body;
+
+  const updatedHabit = await habitService.updateHabit(studyId, habitId, {
+    habitName,
+    startAt,
+  });
+
+  res.status(200).json({
+    success: true,
+    data: updatedHabit,
+  });
 });
 
 export const deleteHabit = asyncHandler(async (req, res) => {
