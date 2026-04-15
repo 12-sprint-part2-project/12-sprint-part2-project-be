@@ -9,6 +9,16 @@ export const getStudies = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "TODO" });
 });
 
+export const getStudyById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) throw new BadRequestError("존재하지 않는 스터디입니다.");
+
+  const study = await studyService.getStudyById(id);
+
+  res.status(200).json({ success: true, data: study });
+});
+
 export const createStudy = asyncHandler(async (req, res) => {
   const { nickname, title, description, theme, password } = req.body;
 
@@ -29,10 +39,6 @@ export const createStudy = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json({ success: true, data: createdStudy });
-});
-
-export const getStudyById = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: "TODO" });
 });
 
 export const updateStudy = asyncHandler(async (req, res) => {
