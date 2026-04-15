@@ -4,11 +4,21 @@ import {
   StudyNotFoundError,
 } from "../../errors/CustomError.js";
 
+// KST 기준 "오늘 날짜" 생성 (안 꼬이는 방식)
+const getTodayKST = () => {
+  const now = new Date();
+
+  // 한국 시간 기준으로 YYYY-MM-DD 문자열 만들기
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const dateStr = kst.toISOString().slice(0, 10);
+
+  // DB용 Date 객체 (날짜만 의미)
+  return new Date(dateStr);
+};
+
 export const getTodayHabits = async (studyId) => {
   // 오늘 날짜 (시간 제거)
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
+  const today = getTodayKST();
   const habits = await prisma.habit.findMany({
     where: {
       studyId: Number(studyId),
@@ -96,8 +106,7 @@ export const toggleHabit = async (studyId, habitId, data) => {
   }
 
   // 3. 오늘 날짜 생성 (시간 제거해서 날짜 기준으로 비교)
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getTodayKST();
 
   // 4. 오늘 해당 habit의 로그가 이미 있는지 조회
   const existingLog = await prisma.habitLog.findUnique({
@@ -108,10 +117,7 @@ export const toggleHabit = async (studyId, habitId, data) => {
       },
     },
   });
-
-  // 현재 시각 (기록 시간용)
   const now = new Date();
-
   let result;
 
   // 5. 로그가 없으면 → 생성
