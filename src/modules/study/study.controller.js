@@ -1,6 +1,9 @@
 import * as studyService from "./study.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
-import { BadRequestError } from "../../errors/CustomError.js";
+import {
+  AuthenticationError,
+  BadRequestError,
+} from "../../errors/CustomError.js";
 
 export const getStudies = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "TODO" });
@@ -75,7 +78,29 @@ export const verifyPassword = asyncHandler(async (req, res) => {
   if (!isCorrect) {
     throw new BadRequestError("비밀번호가 올바르지 않습니다.");
   }
-  res.status(200).json({ succss: true });
+  /*세션에 스터디 id를 저장하는 로직*/
+  // 세션에 인증된 스터디 목록이 없으면 빈 배열 생성
+  if (!req.session.authorizedStudies) {
+    req.session.authorizedStudies = [];
+  }
+  //비밀번호가 일치할 시, 현재 스터디 id를, 세션 배열에 추가
+  if (!req.session.authorizedStudies.includes(Number(id))) {
+    req.session.authorizedStudies.push(Number(id));
+  }
+  res
+    .status(200)
+    .json({ success: true, data: { session: req.session.authorizedStudies } }); //현재 세션에 어떤 스터디 id가 들어있는지도 함께 응답으로 보냄.
+});
+
+//세션에 있는 스터디 id인지 점검
+export const checkSession = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const isAuthorized = req.session.authorizedStudies?.includes(Number(id));
+  if (!isAuthorized) {
+    //세션에 없는 스터디 id 일시, 에러를 리턴한다. (그런데 그냥 응답으로 주는 게 프론트가 편하다는데, 뭐가 좋을까?)
+    throw new AuthenticationError();
+  }
+  res.status(200).json({ success: true });
 });
 
 export const addEmoji = asyncHandler(async (req, res) => {
