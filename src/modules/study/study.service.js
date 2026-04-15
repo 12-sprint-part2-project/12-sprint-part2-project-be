@@ -30,7 +30,11 @@ export const getStudyById = async (id) => {
           },
         },
       },
-      focusSessions: true,
+      focusSessions: {
+        select: {
+          earnedPoint: true,
+        },
+      },
       emojis: true,
     },
   });
