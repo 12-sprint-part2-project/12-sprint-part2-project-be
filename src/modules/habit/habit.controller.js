@@ -21,7 +21,18 @@ export const createHabit = asyncHandler(async (req, res) => {
 });
 
 export const toggleHabit = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: "TODO" });
+  const studyId = Number(req.params.studyId);
+  const habitId = Number(req.params.habitId);
+  const { completed } = req.body;
+  // 체크/해제 실제 처리(조회, 생성, 수정)는 service에 맡김
+  const toggleHabitLog = await habitService.toggleHabit(studyId, habitId, {
+    completed,
+  });
+
+  res.status(200).json({
+    success: true,
+    data: toggleHabitLog,
+  });
 });
 
 export const updateHabit = asyncHandler(async (req, res) => {
