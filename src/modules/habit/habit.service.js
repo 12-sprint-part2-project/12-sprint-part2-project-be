@@ -65,7 +65,9 @@ export const createHabit = async (studyId, data) => {
   return newHabit;
 };
 
-export const toggleHabit = async (studyId, habitId, completed) => {};
+export const toggleHabit = async (studyId, habitId, data) => {
+  const { completed } = data;
+};
 export const updateHabit = async (studyId, habitId, data) => {};
 export const deleteHabit = async (studyId, habitId) => {};
 export const getWeeklyLogs = async (studyId, date) => {};
