@@ -47,15 +47,18 @@ export const createSession = asyncHandler(async (req, res) => {
 
 // 오늘의 집중 상태 변경
 export const updateSession = asyncHandler(async (req, res) => {
-  const studyId = Number(req.params.studyId);
-
-  // req.params.id로 넘어올 줄 알았는데 해당 값은 sessionId로 넘어옴
-  const id = Number(req.params.sessionId);
+  const studyId = req.studyId;
+  const sessionId = req.params.sessionId;
   const action = req.body.action;
 
-  if (!studyId || !id || !action) throw new BadRequestError("필수 데이터 누락");
+  if (!studyId || !sessionId || !action)
+    throw new BadRequestError("필수 데이터 누락");
 
-  const updateFocus = await focusService.updateSession(studyId, id, action);
+  const updateFocus = await focusService.updateSession(
+    studyId,
+    sessionId,
+    action,
+  );
 
   res.status(200).json({
     success: true,
