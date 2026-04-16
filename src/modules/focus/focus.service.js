@@ -32,9 +32,7 @@ export const createSession = async (studyId, durationMin) => {
     where: { id: studyId },
   });
 
-  if (!study) {
-    throw new StudyNotFoundError();
-  }
+  if (!study) throw new StudyNotFoundError();
 
   // 현재 진행중인 집중이 있는지 확인
   const focus = await prisma.FocusSession.findFirst({
@@ -63,4 +61,58 @@ export const createSession = async (studyId, durationMin) => {
 
   return newFocus;
 };
-export const updateSession = async (id, data) => {};
+export const updateSession = async (studyId, id, status) => {
+  // 해당 스터디가 존재하는지 체크
+  const study = await prisma.study.findUnique({
+    where: { id: studyId },
+  });
+
+  if (!study) throw new StudyNotFoundError();
+
+  // 해당 스터디 존재 및 상태 조회(completed일 경우 상태 변경이 불가능하므로)
+  const focus = await prisma.FocusSession.findFirst({
+    where: {
+      id: id,
+      studyId: studyId,
+    },
+    select: {
+      id: true,
+      studyId: true,
+      status: true,
+      durationMin: true,
+    },
+  });
+
+  if (focus.status === "completed") {
+    throw new ConflictError("종료된 집중 상태는 변경할 수 없습니다.");
+  }
+
+  /* 상태에 따라 업데이트 되어야 할 필드가 달라지기 때문에 let으로 선언
+   ** running과 completed일땐 pausedAt을 null 처리
+   ** completed 처리 되었을 때 포인트 제공
+   */
+  let data = {
+    status: status,
+    updatedAt: new Date(),
+    pausedAt: status === "paused" ? new Date() : null,
+    earnedPoint: status === "completed" ? 8 : 0,
+  };
+
+  // running 상태일 때 현재시간 기준으로 종료 시간 재계산
+  if (status === "running") {
+    const startTime = new Date();
+    data.endTime = new Date(
+      startTime.getTime() + focus.durationMin * 60 * 1000,
+    );
+  }
+
+  const updateFocus = await prisma.FocusSession.update({
+    where: {
+      id: id,
+      studyId: studyId,
+    },
+    data: data,
+  });
+
+  return updateFocus;
+};
