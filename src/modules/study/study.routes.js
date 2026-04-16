@@ -1,7 +1,10 @@
 import express from "express";
+import { validateId } from "../middlewares/validateId.js";
 import * as studyController from "./study.controller.js";
 
 const router = express.Router();
+
+router.param("studyId", validateId);
 
 router.get("/", studyController.getStudies);
 router.post("/", studyController.createStudy);
