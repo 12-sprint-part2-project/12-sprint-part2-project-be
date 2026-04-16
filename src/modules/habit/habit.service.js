@@ -145,6 +145,77 @@ export const toggleHabit = async (studyId, habitId, data) => {
   // 7. controller로 결과 반환
   return result;
 };
-export const updateHabit = async (studyId, habitId, data) => {};
+
+export const updateHabit = async (studyId, habitId, data) => {
+  const { habitName, startAt } = data;
+
+  if (!studyId || Number.isNaN(studyId)) {
+    throw new BadRequestError("유효하지 않은 스터디 ID입니다.");
+  }
+
+  if (!habitId || Number.isNaN(habitId)) {
+    throw new BadRequestError("유효하지 않은 습관 ID입니다.");
+  }
+
+  // 수정할 값이 없으면 잘못된 요청
+  const hasHabitName = habitName !== undefined;
+  const hasStartAt = startAt !== undefined;
+
+  if (!hasHabitName && !hasStartAt) {
+    throw new BadRequestError("수정할 값이 없습니다.");
+  }
+
+  if (hasHabitName) {
+    if (typeof habitName !== "string" || !habitName.trim()) {
+      throw new BadRequestError("습관 이름은 빈 문자열일 수 없습니다.");
+    }
+  }
+
+  // startAt이 들어왔으면 날짜로 변환 가능한 값인지 검사
+  let parsedStartAt;
+
+  if (hasStartAt) {
+    parsedStartAt = new Date(startAt);
+
+    if (Number.isNaN(parsedStartAt.getTime())) {
+      throw new BadRequestError("유효하지 않은 시작 날짜입니다.");
+    }
+  }
+
+  const habit = await prisma.habit.findFirst({
+    where: {
+      id: habitId,
+      studyId: studyId,
+    },
+  });
+
+  if (!habit) {
+    throw new StudyNotFoundError();
+  }
+
+  if (habit.endAt !== null) {
+    throw new BadRequestError("종료된 습관은 수정할 수 없습니다.");
+  }
+
+  // 실제로 수정할 데이터만 객체에 담기
+  const updateData = {};
+
+  if (hasHabitName) {
+    updateData.habitName = habitName.trim();
+  }
+
+  if (hasStartAt) {
+    updateData.startAt = parsedStartAt;
+  }
+
+  const updatedHabit = await prisma.habit.update({
+    where: {
+      id: habitId,
+    },
+    data: updateData,
+  });
+
+  return updatedHabit;
+};
 export const deleteHabit = async (studyId, habitId) => {};
 export const getWeeklyLogs = async (studyId, date) => {};
