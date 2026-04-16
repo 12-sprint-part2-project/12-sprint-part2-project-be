@@ -14,7 +14,7 @@ export const getStudyById = async (id) => {
   sunday.setHours(23, 59, 59, 999);
 
   const res = prisma.study.findUniqueOrThrow({
-    where: { id: Number(id) },
+    where: { id },
     omit: { password: true },
     include: {
       habits: {
@@ -53,7 +53,7 @@ export const createStudy = async (data) => {
 
 export const updateStudy = async (id, data) => {
   const res = await prisma.study.update({
-    where: { id: Number(id) },
+    where: { id },
     data,
   });
   return res;
@@ -61,7 +61,7 @@ export const updateStudy = async (id, data) => {
 
 export const deleteStudy = async (id) => {
   const res = await prisma.study.delete({
-    where: { id: Number(id) },
+    where: { id },
   });
   return res;
 };
@@ -69,7 +69,7 @@ export const deleteStudy = async (id) => {
 export const verifyPassword = async (id, password) => {
   //prisma로, 해당하는 id의 스터디를 가져온다. (password필드만 셀렉해서 가져옴.)
   const study = await prisma.study.findUniqueOrThrow({
-    where: { id: Number(id) },
+    where: { id },
     select: { password: true },
   });
   //가져온 study의 password필드를 주어진 password와 비교한다.
