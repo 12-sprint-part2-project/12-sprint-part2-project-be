@@ -4,7 +4,11 @@ import asyncHandler from "../../common/middlewares/asyncHandler.js";
 export const getTodayHabits = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
   const habits = await habitService.getTodayHabits(studyId);
-  res.status(200).json(habits);
+
+  res.status(200).json({
+    success: true,
+    data: habits,
+  });
 });
 
 export const createHabit = asyncHandler(async (req, res) => {

@@ -1,7 +1,6 @@
 import prisma from "../../lib/prisma.js";
 import {
   BadRequestError,
-  StudyNotFoundError,
   HabitNotFoundError,
 } from "../../errors/CustomError.js";
 
@@ -75,7 +74,7 @@ export const toggleHabit = async (studyId, habitId, data) => {
   const habit = await prisma.habit.findFirst({
     where: {
       id: habitId,
-      studyId: studyId,
+      studyId,
     },
   });
 
@@ -156,12 +155,12 @@ export const updateHabit = async (studyId, habitId, data) => {
   const habit = await prisma.habit.findFirst({
     where: {
       id: habitId,
-      studyId: studyId,
+      studyId,
     },
   });
 
   if (!habit) {
-    throw new StudyNotFoundError();
+    throw new HabitNotFoundError();
   }
 
   if (habit.endAt !== null) {
@@ -194,7 +193,7 @@ export const deleteHabit = async (studyId, habitId) => {
   const habit = await prisma.habit.findFirst({
     where: {
       id: habitId,
-      studyId: Number(studyId),
+      studyId,
     },
   });
 
