@@ -224,7 +224,7 @@ export const deleteHabit = async (studyId, habitId) => {
   const habit = await prisma.habit.findFirst({
     where: {
       id: habitId,
-      studyId,
+      studyId: Number(studyId),
     },
   });
 
