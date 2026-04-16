@@ -56,14 +56,7 @@ export const createSession = async (studyId, durationMin) => {
   return newFocus;
 };
 export const updateSession = async (studyId, id, status) => {
-  // 해당 스터디가 존재하는지 체크
-  const study = await prisma.study.findUnique({
-    where: { id: studyId },
-  });
-
-  if (!study) throw new StudyNotFoundError();
-
-  // 해당 스터디 존재 및 상태 조회(completed일 경우 상태 변경이 불가능하므로)
+  // 해당 집중 존재 및 상태 조회(completed일 경우 상태 변경이 불가능하므로)
   const focus = await prisma.FocusSession.findFirst({
     where: {
       id: id,
