@@ -1,5 +1,8 @@
 import prisma from "../../lib/prisma.js";
-import { StudyNotFoundError } from "../../errors/CustomError.js";
+import {
+  BadRequestError,
+  StudyNotFoundError,
+} from "../../errors/CustomError.js";
 
 export const checkStudyExists = async (req, res, next) => {
   const studyId = Number(req.params.studyId);
