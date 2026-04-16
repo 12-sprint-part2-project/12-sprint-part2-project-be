@@ -12,8 +12,6 @@ export const getStudies = asyncHandler(async (req, res) => {
 export const getStudyById = asyncHandler(async (req, res) => {
   const { studyId } = req.params;
 
-  if (!studyId) throw new BadRequestError("존재하지 않는 스터디입니다.");
-
   const study = await studyService.getStudyById(studyId);
 
   res.status(200).json({ success: true, data: study });
@@ -44,10 +42,6 @@ export const updateStudy = asyncHandler(async (req, res) => {
   const { studyId } = req.params;
   const { title, description, theme, password, nickname } = req.body;
 
-  if (isNaN(studyId)) {
-    throw new BadRequestError("id는 숫자여야 합니다.");
-  }
-
   if (!title || !theme || !password || !nickname) {
     throw new BadRequestError(
       "스터디 수정에 실패했습니다. 유효하지 않은 입력값입니다.",
@@ -61,14 +55,13 @@ export const updateStudy = asyncHandler(async (req, res) => {
     password,
     nickname,
   });
+
   res.status(200).json({ success: true, data: updatedStudy });
 });
 
 export const deleteStudy = asyncHandler(async (req, res) => {
   const { studyId } = req.params;
-  if (isNaN(studyId)) {
-    throw new BadRequestError("id는 숫자여야 합니다.");
-  }
+
   await studyService.deleteStudy(studyId);
 
   res.status(204).send();
@@ -77,10 +70,9 @@ export const deleteStudy = asyncHandler(async (req, res) => {
 export const verifyPassword = asyncHandler(async (req, res) => {
   const { studyId } = req.params;
   const { password } = req.body;
-  if (isNaN(studyId)) {
-    throw new BadRequestError("id는 숫자여야 합니다.");
-  }
+
   const isCorrect = await studyService.verifyPassword(studyId, password); //boolean값을 리턴 받는다. true면 일치, false면 불일치.
+
   if (!isCorrect) {
     throw new BadRequestError("비밀번호가 올바르지 않습니다.");
   }
@@ -90,8 +82,8 @@ export const verifyPassword = asyncHandler(async (req, res) => {
     req.session.authorizedStudies = [];
   }
   //비밀번호가 일치할 시, 현재 스터디 id를, 세션 배열에 추가
-  if (!req.session.authorizedStudies.includes(Number(studyId))) {
-    req.session.authorizedStudies.push(Number(studyId));
+  if (!req.session.authorizedStudies.includes(studyId)) {
+    req.session.authorizedStudies.push(studyId);
   }
   res
     .status(200)
@@ -101,7 +93,7 @@ export const verifyPassword = asyncHandler(async (req, res) => {
 //세션에 있는 스터디 id인지 점검
 export const checkSession = asyncHandler(async (req, res) => {
   const { studyId } = req.params;
-  const isAuthorized = req.session.authorizedStudies?.includes(Number(studyId));
+  const isAuthorized = req.session.authorizedStudies?.includes(studyId);
   if (!isAuthorized) {
     //세션에 없는 스터디 id 일시, 에러를 리턴한다. (그런데 그냥 응답으로 주는 게 프론트가 편하다는데, 뭐가 좋을까?)
     throw new AuthenticationError();
