@@ -46,7 +46,7 @@ export const createSession = async (studyId, durationMin) => {
     },
   });
 
-  if (focus) throw new ConflictError();
+  if (focus) throw new ConflictError("이미 진행 중인 집중 세션이 있습니다");
 
   // 현재 시간에 durationMin을 더한 시간을 endTime으로 삽입
   const startTime = new Date();
