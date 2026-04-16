@@ -5,6 +5,7 @@ import {
 import * as focusService from "./focus.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
 
+// 오늘의 집중 데이터 조회
 export const getSession = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
   const focus = await focusService.getSession(studyId);
@@ -29,6 +30,7 @@ export const getSession = asyncHandler(async (req, res) => {
   });
 });
 
+// 오늘의 집중 신규 생성
 export const createSession = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
   const durationMin = req.body.durationMin;
@@ -43,6 +45,20 @@ export const createSession = asyncHandler(async (req, res) => {
   });
 });
 
+// 오늘의 집중 상태 변경
 export const updateSession = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: "TODO" });
+  const studyId = Number(req.params.studyId);
+
+  // req.params.id로 넘어올 줄 알았는데 해당 값은 sessionId로 넘어옴
+  const id = Number(req.params.sessionId);
+  const action = req.body.action;
+
+  if (!studyId || !id || !action) throw new BadRequestError("필수 데이터 누락");
+
+  const updateFocus = await focusService.updateSession(studyId, id, action);
+
+  res.status(200).json({
+    success: true,
+    data: updateFocus,
+  });
 });
