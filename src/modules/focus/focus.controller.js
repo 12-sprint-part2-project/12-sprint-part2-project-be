@@ -1,4 +1,7 @@
-import { FocusNotFoundError } from "../../errors/CustomError.js";
+import {
+  FocusNotFoundError,
+  BadRequestError,
+} from "../../errors/CustomError.js";
 import * as focusService from "./focus.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
 
@@ -23,7 +26,18 @@ export const getSession = asyncHandler(async (req, res) => {
 });
 
 export const createSession = asyncHandler(async (req, res) => {
-  res.status(201).json({ message: "TODO" });
+  const studyId = Number(req.params.studyId);
+  const durationMin = Number(req.body.durationMin);
+
+  if (!studyId) throw new BadRequestError("studyId 데이터 넘어오지 않음");
+  if (!durationMin || durationMin <= 0)
+    throw new BadRequestError("durationMin 데이터 오류");
+
+  const newFocus = await focusService.createSession(studyId, durationMin);
+  res.status(201).json({
+    success: true,
+    data: newFocus,
+  });
 });
 
 export const updateSession = asyncHandler(async (req, res) => {
