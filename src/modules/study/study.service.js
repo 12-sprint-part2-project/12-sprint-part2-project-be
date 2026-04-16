@@ -1,6 +1,61 @@
 import prisma from "../../lib/prisma.js";
 
-export const getStudies = async () => {};
+export const getStudies = async (data) => {
+  const page = Number(data.page) || 1; // 현재 페이지 초기 설정
+  const limit = Number(data.limit) || 6; // 페이지당 출력 수 초기 설정
+  const keyword = data.keyword || ""; // 검색 키워드
+  const sortBy = data.sortBy || "createdAt"; // 초기 정렬 기준 필드
+  const order = data.order || "desc"; // 초기 정렬 순서
+
+  const skip = (page - 1) * limit; // 건너뛸 수
+
+  const where = {};
+
+  if (keyword) {
+    // 스터디 제목에 검색키워드 포함된 데이터만
+    where.OR = [{ title: { contains: keyword, mode: "insensitive" } }];
+  }
+
+  if (sortBy === "points") {
+    const allStudiesRaw = await prisma.study.findMany({
+      where,
+      include: {
+        focusSessions: {
+          where: { status: "completed" },
+          select: { earnedPoints: true },
+        },
+        emojis: true,
+      },
+    });
+
+    const allStudies = allStudiesRaw.map(({ focusSessions, ...rest }) => ({
+      ...rest,
+      points: focusSessions.reduce((sum, s) => sum + s.earnedPoints, 0),
+    }));
+
+    allStudies.sort((a, b) =>
+      order === "desc" ? b.points - a.points : a.points - b.points,
+    );
+  }
+
+  const [studies, total] = await Promise.all([
+    prisma.study.findMany({
+      skip,
+      take: limit,
+      where,
+      orderBy: { [sortBy]: order },
+    }),
+    prisma.study.count({ where }),
+  ]);
+
+  const has_more = skip + limit < total;
+
+  return {
+    data: studies,
+    total,
+    has_more,
+  };
+};
 
 export const getStudyById = async (id) => {
   const today = new Date();
@@ -13,8 +68,8 @@ export const getStudyById = async (id) => {
   sunday.setDate(monday.getDate() + 6);
   sunday.setHours(23, 59, 59, 999);
 
-  const res = prisma.study.findUniqueOrThrow({
-    where: { id },
+  const res = await prisma.study.findUniqueOrThrow({
+    where: { id: id },
     omit: { password: true },
     include: {
       habits: {
@@ -33,7 +88,7 @@ export const getStudyById = async (id) => {
       focusSessions: {
         where: { status: "completed" },
         select: {
-          earnedPoint: true,
+          earnedPoints: true,
         },
       },
       emojis: true,
