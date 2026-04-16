@@ -2,13 +2,13 @@ import * as habitService from "./habit.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
 
 export const getTodayHabits = asyncHandler(async (req, res) => {
-  const { studyId } = req.params;
+  const studyId = req.studyId;
   const habits = await habitService.getTodayHabits(studyId);
   res.status(200).json(habits);
 });
 
 export const createHabit = asyncHandler(async (req, res) => {
-  const studyId = Number(req.params.studyId);
+  const studyId = req.studyId;
   const { habitName } = req.body;
   const newHabit = await habitService.createHabit(studyId, {
     habitName,
@@ -21,8 +21,9 @@ export const createHabit = asyncHandler(async (req, res) => {
 });
 
 export const toggleHabit = asyncHandler(async (req, res) => {
-  const studyId = Number(req.params.studyId);
-  const habitId = Number(req.params.habitId);
+  const studyId = req.studyId;
+  const habitId = req.params.habitId;
+
   const { completed } = req.body;
 
   const toggleHabitLog = await habitService.toggleHabit(studyId, habitId, {
@@ -36,8 +37,8 @@ export const toggleHabit = asyncHandler(async (req, res) => {
 });
 
 export const updateHabit = asyncHandler(async (req, res) => {
-  const studyId = Number(req.params.studyId);
-  const habitId = Number(req.params.habitId);
+  const studyId = req.studyId;
+  const habitId = req.params.habitId;
 
   const { habitName, startAt } = req.body;
 
@@ -53,7 +54,9 @@ export const updateHabit = asyncHandler(async (req, res) => {
 });
 
 export const deleteHabit = asyncHandler(async (req, res) => {
-  const { studyId, habitId } = req.params;
+  const studyId = req.studyId;
+  const habitId = req.params.habitId;
+
   await habitService.deleteHabit(studyId, habitId);
 
   res.status(204).send();

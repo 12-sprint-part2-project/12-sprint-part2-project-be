@@ -22,7 +22,7 @@ export const getTodayHabits = async (studyId) => {
   const today = getTodayKST();
   const habits = await prisma.habit.findMany({
     where: {
-      studyId: Number(studyId),
+      studyId,
       startAt: { lte: today },
       OR: [{ endAt: null }, { endAt: { gte: today } }],
     },
@@ -45,26 +45,12 @@ export const getTodayHabits = async (studyId) => {
 export const createHabit = async (studyId, data) => {
   const { habitName } = data;
 
-  // 1. studyId 검증
-  if (!studyId || Number.isNaN(studyId)) {
-    throw new BadRequestError("유효하지 않은 스터디 ID입니다.");
-  }
-
-  // 2. habitName 검증
+  // 1. habitName 검증
   if (!habitName || !habitName.trim()) {
     throw new BadRequestError("습관 이름은 필수입니다.");
   }
 
-  // 3. study 존재 여부 확인
-  const study = await prisma.study.findUnique({
-    where: { id: studyId },
-  });
-
-  if (!study) {
-    throw new StudyNotFoundError();
-  }
-
-  // 4. 생성
+  // 2. 생성
   const newHabit = await prisma.habit.create({
     data: {
       studyId,
@@ -80,14 +66,6 @@ export const toggleHabit = async (studyId, habitId, data) => {
   const { completed } = data;
 
   // 1. 기본 값 검증
-  if (!studyId || Number.isNaN(studyId)) {
-    throw new BadRequestError("유효하지 않은 스터디 ID입니다.");
-  }
-
-  if (!habitId || Number.isNaN(habitId)) {
-    throw new BadRequestError("유효하지 않은 습관 ID입니다.");
-  }
-
   // completed는 true/false만 허용
   if (typeof completed !== "boolean") {
     throw new BadRequestError("completed 값은 boolean이어야 합니다.");
@@ -103,7 +81,7 @@ export const toggleHabit = async (studyId, habitId, data) => {
 
   // 없으면 404 처리 (스터디 or 습관 없음)
   if (!habit) {
-    throw new StudyNotFoundError();
+    throw new HabitNotFoundError();
   }
 
   // 3. 오늘 날짜 생성 (시간 제거해서 날짜 기준으로 비교)
@@ -149,14 +127,6 @@ export const toggleHabit = async (studyId, habitId, data) => {
 
 export const updateHabit = async (studyId, habitId, data) => {
   const { habitName, startAt } = data;
-
-  if (!studyId || Number.isNaN(studyId)) {
-    throw new BadRequestError("유효하지 않은 스터디 ID입니다.");
-  }
-
-  if (!habitId || Number.isNaN(habitId)) {
-    throw new BadRequestError("유효하지 않은 습관 ID입니다.");
-  }
 
   // 수정할 값이 없으면 잘못된 요청
   const hasHabitName = habitName !== undefined;
