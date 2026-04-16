@@ -8,8 +8,8 @@ import {
 const PRISMA_P2025_MAP = {
   study: StudyNotFoundError,
   habit: HabitNotFoundError,
-  HabitLog: HabitLogNotFoundError,
-  focusesession: FocusNotFoundError,
+  habitlog: HabitLogNotFoundError,
+  focussession: FocusNotFoundError,
 };
 
 const normalize = (name = "") => name.toLowerCase();
