@@ -6,6 +6,7 @@ export class AppError extends Error {
     { status = 500, code = ERROR_CODES.INTERNAL_ERROR } = {},
   ) {
     super(message);
+    this.name = this.constructor.name;
     this.status = status;
     this.code = code;
   }
@@ -26,6 +27,15 @@ export class HabitNotFoundError extends AppError {
     super("습관을 찾을 수 없습니다", {
       status: 404,
       code: ERROR_CODES.HABIT_NOT_FOUND,
+    });
+  }
+}
+
+export class HabitLogNotFoundError extends AppError {
+  constructor() {
+    super("습관 기록을 찾을 수 없습니다", {
+      status: 404,
+      code: ERROR_CODES.HABIT_LOG_NOT_FOUND,
     });
   }
 }
