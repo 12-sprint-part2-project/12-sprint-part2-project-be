@@ -6,6 +6,7 @@ export class AppError extends Error {
     { status = 500, code = ERROR_CODES.INTERNAL_ERROR } = {},
   ) {
     super(message);
+    this.name = this.constructor.name;
     this.status = status;
     this.code = code;
   }
