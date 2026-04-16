@@ -4,7 +4,7 @@ import { StudyNotFoundError, ConflictError } from "../../errors/CustomError.js";
 export const getSession = async (studyId) => {
   const focus = await prisma.FocusSession.findFirst({
     where: {
-      studyId: studyId,
+      studyId,
     },
     select: {
       id: true,
@@ -26,20 +26,12 @@ export const getSession = async (studyId) => {
 
   return focus;
 };
+
 export const createSession = async (studyId, durationMin) => {
-  // 해당 스터디가 존재하는지 체크
-  const study = await prisma.study.findUnique({
-    where: { id: studyId },
-  });
-
-  if (!study) {
-    throw new StudyNotFoundError();
-  }
-
   // 현재 진행중인 집중이 있는지 확인
   const focus = await prisma.FocusSession.findFirst({
     where: {
-      studyId: studyId,
+      studyId,
       status: {
         in: ["running", "paused"],
       },
@@ -54,10 +46,10 @@ export const createSession = async (studyId, durationMin) => {
 
   const newFocus = await prisma.FocusSession.create({
     data: {
-      studyId: studyId,
-      durationMin: durationMin,
+      studyId,
+      durationMin,
       status: "running",
-      endTime: endTime,
+      endTime,
     },
   });
 

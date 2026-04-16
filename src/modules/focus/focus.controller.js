@@ -6,11 +6,15 @@ import * as focusService from "./focus.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
 
 export const getSession = asyncHandler(async (req, res) => {
-  const studyId = Number(req.params.studyId);
+  const studyId = req.studyId;
   const focus = await focusService.getSession(studyId);
 
-  if (!focus)
-    throw new FocusNotFoundError("해당 studyId로 등록된 데이터 미존재");
+  if (!focus) {
+    return res.status(200).json({
+      success: true,
+      data: null,
+    });
+  }
 
   if (focus.status === "completed") {
     return res.status(200).json({
@@ -26,10 +30,9 @@ export const getSession = asyncHandler(async (req, res) => {
 });
 
 export const createSession = asyncHandler(async (req, res) => {
-  const studyId = Number(req.params.studyId);
-  const durationMin = Number(req.body.durationMin);
+  const studyId = req.studyId;
+  const durationMin = req.body.durationMin;
 
-  if (!studyId) throw new BadRequestError("studyId 데이터 넘어오지 않음");
   if (!durationMin || durationMin <= 0)
     throw new BadRequestError("durationMin 데이터 오류");
 
