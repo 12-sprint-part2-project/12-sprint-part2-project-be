@@ -1,6 +1,91 @@
 import prisma from "../../lib/prisma.js";
 
-export const getStudies = async () => {};
+export const getStudies = async (data) => {
+  const page = Number(data.page) || 1; // 현재 페이지 초기 설정
+  const limit = Number(data.limit) || 6; // 페이지당 출력 수 초기 설정
+  const keyword = data.keyword || ""; // 검색 키워드
+  const sortBy = data.sortBy || "createdAt"; // 초기 정렬 기준 필드
+  const order = data.order || "desc"; // 초기 정렬 순서
+
+  const skip = (page - 1) * limit; // 건너뛸 수
+
+  const where = {};
+
+  if (keyword) {
+    // 스터디 제목에 검색키워드 포함된 데이터만
+    where.OR = [{ title: { contains: keyword, mode: "insensitive" } }];
+  }
+
+  /**
+   * 정렬 기준에 따라 응답해야할 데이터를 다르게 처리
+   * 포인트 기준을 정렬을 해야하는 경우 집중 테이블(focusSessions)의 필드 데이터(earnedPoint)의 합계로 이루어져야 하는 이슈
+   * 이 부분은 $queryRaw(?)를 이용해서 구현할 수 있다고는 하나 온전히 ai 가 짜준 코드를 복붙하는 수준밖에 안되는 상태라 용납할 수 없음
+   * $queryRaw 를 찾아보고 적용하는 것은 추후에 고려.
+   * 차선책으로는 study 테이블에 포인트합계 필드를 추가해서
+   * 포인트 획득시 study 테이블, focusSessions 테이블 두 곳을 컨트롤하는 방법도 있음.
+   *
+   * 결론:
+   * 포인트 기준 정렬 요청시 조회된 전체 데이터에서 배열을 포인트 정렬 기준에 맞게 가공 후 return
+   * 생성일시 기준 정렬 요청시 조회시 쿼리를 사용해서 데이터를 가져옴
+   */
+  if (sortBy === "points") {
+    const allStudiesRaw = await prisma.study.findMany({
+      where,
+      include: {
+        focusSessions: {
+          where: { status: "completed" },
+          select: { earnedPoint: true },
+        },
+        emojis: true,
+      },
+    });
+
+    const allStudies = allStudiesRaw.map(({ focusSessions, ...rest }) => ({
+      ...rest,
+      points: focusSessions.reduce((sum, s) => sum + s.earnedPoint, 0),
+    }));
+
+    allStudies.sort((a, b) =>
+      order === "desc" ? b.points - a.points : a.points - b.points,
+    );
+
+    const total = allStudies.length;
+    const studies = allStudies.slice(skip, skip + limit);
+    const has_more = skip + limit < total;
+
+    return { data: studies, total, has_more };
+  }
+
+  const [studiesRaw, total] = await Promise.all([
+    prisma.study.findMany({
+      skip,
+      take: limit,
+      where,
+      orderBy: { [sortBy]: order },
+      include: {
+        focusSessions: {
+          where: { status: "completed" },
+          select: { earnedPoint: true },
+        },
+        emojis: true,
+      },
+    }),
+    prisma.study.count({ where }),
+  ]);
+
+  const studies = studiesRaw.map(({ focusSessions, ...rest }) => ({
+    ...rest,
+    points: focusSessions.reduce((sum, s) => sum + s.earnedPoint, 0),
+  }));
+
+  const has_more = skip + limit < total;
+
+  return {
+    data: studies,
+    total,
+    has_more,
+  };
+};
 
 export const getStudyById = async (id) => {
   const today = new Date();
@@ -13,8 +98,8 @@ export const getStudyById = async (id) => {
   sunday.setDate(monday.getDate() + 6);
   sunday.setHours(23, 59, 59, 999);
 
-  const res = prisma.study.findUniqueOrThrow({
-    where: { id },
+  const res = await prisma.study.findUniqueOrThrow({
+    where: { id: id },
     omit: { password: true },
     include: {
       habits: {
