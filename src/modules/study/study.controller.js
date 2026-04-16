@@ -6,9 +6,9 @@ import {
 } from "../../errors/CustomError.js";
 
 export const getStudies = asyncHandler(async (req, res) => {
-  const { page, limit, keyword, sortBy, order } = req.qeury;
+  const { page, limit, keyword, sortBy, order } = req.qeury || {};
 
-  const data = await studyService.getStudies({
+  const result = await studyService.getStudies({
     page,
     limit,
     keyword,
@@ -16,7 +16,14 @@ export const getStudies = asyncHandler(async (req, res) => {
     order,
   });
 
-  res.status(200).json({ success: true, data: data.studies });
+  res
+    .status(200)
+    .json({
+      success: true,
+      data: result.data,
+      total: result.total,
+      has_more: result.has_more,
+    });
 });
 
 export const getStudyById = asyncHandler(async (req, res) => {

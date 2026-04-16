@@ -16,13 +16,25 @@ export const getStudies = async (data) => {
     where.OR = [{ title: { contains: keyword, mode: "insensitive" } }];
   }
 
+  /**
+   * 정렬 기준에 따라 응답해야할 데이터를 다르게 처리
+   * 포인트 기준을 정렬을 해야하는 경우 집중 테이블(focusSessions)의 필드 데이터(earnedPoint)의 합계로 이루어져야 하는 이슈
+   * 이 부분은 $queryRaw(?)를 이용해서 구현할 수 있다고는 하나 온전히 ai 가 짜준 코드를 복붙하는 수준밖에 안되는 상태라 용납할 수 없음
+   * $queryRaw 를 찾아보고 적용하는 것은 추후에 고려.
+   * 차선책으로는 study 테이블에 포인트합계 필드를 추가해서
+   * 포인트 획득시 study 테이블, focusSessions 테이블 두 곳을 컨트롤하는 방법도 있음.
+   *
+   * 결론:
+   * 포인트 기준 정렬 요청시 조회된 전체 데이터에서 배열을 포인트 정렬 기준에 맞게 가공 후 return
+   * 생성일시 기준 정렬 요청시 조회시 쿼리를 사용해서 데이터를 가져옴
+   */
   if (sortBy === "points") {
     const allStudiesRaw = await prisma.study.findMany({
       where,
       include: {
         focusSessions: {
           where: { status: "completed" },
-          select: { earnedPoints: true },
+          select: { earnedPoint: true },
         },
         emojis: true,
       },
@@ -30,23 +42,41 @@ export const getStudies = async (data) => {
 
     const allStudies = allStudiesRaw.map(({ focusSessions, ...rest }) => ({
       ...rest,
-      points: focusSessions.reduce((sum, s) => sum + s.earnedPoints, 0),
+      points: focusSessions.reduce((sum, s) => sum + s.earnedPoint, 0),
     }));
 
     allStudies.sort((a, b) =>
       order === "desc" ? b.points - a.points : a.points - b.points,
     );
+
+    const total = allStudies.length;
+    const studies = allStudies.slice(skip, skip + limit);
+    const has_more = skip + limit < total;
+
+    return { data: studies, total, has_more };
   }
 
-  const [studies, total] = await Promise.all([
+  const [studiesRaw, total] = await Promise.all([
     prisma.study.findMany({
       skip,
       take: limit,
       where,
       orderBy: { [sortBy]: order },
+      include: {
+        focusSessions: {
+          where: { status: "completed" },
+          select: { earnedPoint: true },
+        },
+        emojis: true,
+      },
     }),
     prisma.study.count({ where }),
   ]);
+
+  const studies = studiesRaw.map(({ focusSessions, ...rest }) => ({
+    ...rest,
+    points: focusSessions.reduce((sum, s) => sum + s.earnedPoint, 0),
+  }));
 
   const has_more = skip + limit < total;
 
@@ -88,7 +118,7 @@ export const getStudyById = async (id) => {
       focusSessions: {
         where: { status: "completed" },
         select: {
-          earnedPoints: true,
+          earnedPoint: true,
         },
       },
       emojis: true,
