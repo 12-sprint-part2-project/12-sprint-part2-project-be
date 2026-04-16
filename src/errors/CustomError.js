@@ -31,6 +31,15 @@ export class HabitNotFoundError extends AppError {
   }
 }
 
+export class HabitLogNotFoundError extends AppError {
+  constructor() {
+    super("습관 기록을 찾을 수 없습니다", {
+      status: 404,
+      code: ERROR_CODES.HABIT_LOG_NOT_FOUND,
+    });
+  }
+}
+
 export class FocusNotFoundError extends AppError {
   constructor() {
     super("집중 세션을 찾을 수 없습니다", {

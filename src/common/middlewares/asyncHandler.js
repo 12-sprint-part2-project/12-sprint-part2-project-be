@@ -1,12 +1,14 @@
 import {
   StudyNotFoundError,
   HabitNotFoundError,
+  HabitLogNotFoundError,
   FocusNotFoundError,
 } from "../../errors/CustomError.js";
 
 const PRISMA_P2025_MAP = {
   study: StudyNotFoundError,
   habit: HabitNotFoundError,
+  HabitLog: HabitLogNotFoundError,
   focusesession: FocusNotFoundError,
 };
 
