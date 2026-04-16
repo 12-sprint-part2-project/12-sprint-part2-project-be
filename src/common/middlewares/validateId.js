@@ -1,4 +1,4 @@
-import { BadRequestError } from "../errors/CustomError.js";
+import { BadRequestError } from "../../errors/CustomError.js";
 
 const PARAM_LABEL = {
   studyId: "스터디 ID",

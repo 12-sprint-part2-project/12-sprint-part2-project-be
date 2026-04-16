@@ -1,5 +1,5 @@
 import express from "express";
-import { validateId } from "../middlewares/validateId.js";
+import { validateId } from "../../common/middlewares/validateId.js";
 import * as focusController from "./focus.controller.js";
 
 const router = express.Router({ mergeParams: true });
