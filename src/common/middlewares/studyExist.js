@@ -2,7 +2,11 @@ import prisma from "../../lib/prisma.js";
 import { StudyNotFoundError } from "../../errors/CustomError.js";
 
 export const checkStudyExists = async (req, res, next) => {
-  const studyId = req.params.studyId;
+  const studyId = Number(req.params.studyId);
+
+  if (!Number.isInteger(studyId) || studyId <= 0) {
+    return next(new BadRequestError("스터디 ID가 올바르지 않습니다"));
+  }
 
   const study = await prisma.study.findUnique({
     where: { id: studyId },
@@ -13,5 +17,6 @@ export const checkStudyExists = async (req, res, next) => {
     return next(new StudyNotFoundError());
   }
 
+  req.studyId = studyId;
   next();
 };
