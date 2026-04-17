@@ -219,4 +219,113 @@ export const deleteHabit = async (studyId, habitId) => {
   });
 };
 
-export const getWeeklyLogs = async (studyId, date) => {};
+export const getWeeklyLogs = async (studyId, date) => {
+  if (!date) {
+    throw new BadRequestError("date 쿼리 파라미터는 필수입니다.");
+  }
+
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    throw new BadRequestError("유효하지 않은 날짜 형식입니다. (YYYY-MM-DD)");
+  }
+
+  // 날짜 문자열만 뽑아서 다시 Date로 생성
+  const dateStr = parsedDate.toISOString().slice(0, 10);
+  const baseDate = new Date(dateStr);
+
+  // 일요일=0, 월요일=1, ... 토요일=6
+  const day = baseDate.getDay();
+
+  // 월요일 시작 기준으로 이번 주 시작일 계산
+  const diffToMonday = day === 0 ? 6 : day - 1;
+
+  const startDate = new Date(baseDate);
+  startDate.setDate(baseDate.getDate() - diffToMonday);
+
+  // 종료일
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + 6);
+
+  // 이번 주와 기간이 겹치는 습관만 조회
+  const habits = await prisma.habit.findMany({
+    where: {
+      studyId,
+      startAt: { lte: endDate },
+      OR: [{ endAt: null }, { endAt: { gte: startDate } }],
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const habitIds = habits.map((habit) => habit.id);
+
+  if (habitIds.length === 0) {
+    return {
+      studyId,
+      startDate,
+      endDate,
+      habits: [],
+    };
+  }
+
+  const habitLogs = await prisma.habitLog.findMany({
+    where: {
+      habitId: { in: habitIds },
+      logDate: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+  });
+
+  const weekDates = Array.from({ length: 7 }, (_, index) => {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + index);
+    return currentDate.toISOString().slice(0, 10);
+  });
+
+  const habitLogMap = new Map(
+    habitLogs.map((log) => [
+      `${log.habitId}-${log.logDate.toISOString().slice(0, 10)}`,
+      log,
+    ]),
+  );
+
+  const weeklyHabits = habits.map((habit) => {
+    const habitStartDateStr = habit.startAt.toISOString().slice(0, 10);
+    const habitEndDateStr = habit.endAt
+      ? habit.endAt.toISOString().slice(0, 10)
+      : null;
+
+    return {
+      habitId: habit.id,
+      habitName: habit.habitName,
+      logs: weekDates.map((dateStr) => {
+        const isActive =
+          habitStartDateStr <= dateStr &&
+          (habitEndDateStr === null || habitEndDateStr >= dateStr);
+
+        if (!isActive) {
+          return {
+            date: dateStr,
+            isCompleted: null,
+          };
+        }
+
+        const log = habitLogMap.get(`${habit.id}-${dateStr}`);
+
+        return {
+          date: dateStr,
+          isCompleted: log ? log.completedAt !== null : false,
+        };
+      }),
+    };
+  });
+
+  return {
+    studyId,
+    startDate,
+    endDate,
+    habits: weeklyHabits,
+  };
+};
