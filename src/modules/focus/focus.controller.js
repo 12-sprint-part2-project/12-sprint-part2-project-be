@@ -17,13 +17,6 @@ export const getSession = asyncHandler(async (req, res) => {
     });
   }
 
-  if (focus.status === "completed") {
-    return res.status(200).json({
-      success: true,
-      data: null,
-    });
-  }
-
   res.status(200).json({
     success: true,
     data: focus,
