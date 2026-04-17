@@ -67,5 +67,13 @@ export const deleteHabit = asyncHandler(async (req, res) => {
 });
 
 export const getWeeklyLogs = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: "TODO" });
+  const studyId = req.studyId;
+  const { date } = req.query;
+
+  const weeklyLogs = await habitService.getWeeklyLogs(studyId, date);
+
+  res.status(200).json({
+    success: true,
+    data: weeklyLogs,
+  });
 });
