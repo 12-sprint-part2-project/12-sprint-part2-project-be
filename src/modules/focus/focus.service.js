@@ -1,10 +1,16 @@
 import prisma from "../../lib/prisma.js";
-import { StudyNotFoundError, ConflictError } from "../../errors/CustomError.js";
+import { ConflictError } from "../../errors/CustomError.js";
 
 export const getSession = async (studyId) => {
   const focus = await prisma.FocusSession.findFirst({
     where: {
       studyId,
+      status: {
+        in: ["running", "paused"],
+      },
+    },
+    orderBy: {
+      startTime: "desc",
     },
     select: {
       id: true,
@@ -19,10 +25,6 @@ export const getSession = async (studyId) => {
   });
 
   if (!focus) return null;
-
-  if (focus.status === "completed") {
-    return { status: "completed" };
-  }
 
   return focus;
 };
