@@ -6,7 +6,24 @@ import {
 } from "../../errors/CustomError.js";
 
 export const getStudies = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: "TODO" });
+  const { page, limit, keyword, sortBy, order } = req.qeury || {};
+
+  const result = await studyService.getStudies({
+    page,
+    limit,
+    keyword,
+    sortBy,
+    order,
+  });
+
+  res
+    .status(200)
+    .json({
+      success: true,
+      data: result.data,
+      total: result.total,
+      has_more: result.has_more,
+    });
 });
 
 export const getStudyById = asyncHandler(async (req, res) => {
@@ -24,7 +41,11 @@ export const createStudy = asyncHandler(async (req, res) => {
   if (!title || !theme || !password || !nickname) {
     throw new BadRequestError(
       "스터디 생성에 실패했습니다. 닉네임, 제목, 테마, 비밀번호는 필수입니다.",
-    );
+    ); //원래는 앞 문장만 정해뒀었는데 혹시모르니 뒤에 문장도 적어둠..
+    //이게 400에러를 반환하는데, 500에러는 알아서 처리되는 거겠지?
+    // asyncHandler 가 있어서 처리되는 방식인 거 같아요!
+    // asyncHandler 에서 성공이면 asyncHandler( 안에 작성된 함수 실행 )
+    // 실패면 next(err) 실행 < next(err) 은 express 약속
   }
 
   const createdStudy = await studyService.createStudy({
