@@ -1,10 +1,16 @@
 import prisma from "../../lib/prisma.js";
-import { StudyNotFoundError, ConflictError } from "../../errors/CustomError.js";
+import { ConflictError } from "../../errors/CustomError.js";
 
 export const getSession = async (studyId) => {
   const focus = await prisma.FocusSession.findFirst({
     where: {
       studyId,
+      status: {
+        in: ["running", "paused"],
+      },
+    },
+    orderBy: {
+      startTime: "desc",
     },
     select: {
       id: true,
@@ -19,10 +25,6 @@ export const getSession = async (studyId) => {
   });
 
   if (!focus) return null;
-
-  if (focus.status === "completed") {
-    return { status: "completed" };
-  }
 
   return focus;
 };
@@ -67,6 +69,8 @@ export const updateSession = async (studyId, id, status) => {
       studyId: true,
       status: true,
       durationMin: true,
+      endTime: true,
+      pausedAt: true,
     },
   });
 
@@ -87,10 +91,10 @@ export const updateSession = async (studyId, id, status) => {
 
   // running 상태일 때 현재시간 기준으로 종료 시간 재계산
   if (status === "running") {
-    const startTime = new Date();
-    data.endTime = new Date(
-      startTime.getTime() + focus.durationMin * 60 * 1000,
-    );
+    const remainingMs =
+      new Date(focus.endTime).getTime() - new Date(focus.pausedAt).getTime();
+
+    data.endTime = new Date(Date.now() + remainingMs);
   }
 
   const updateFocus = await prisma.FocusSession.update({
