@@ -1,8 +1,8 @@
 import prisma from "../../lib/prisma.js";
 import { ConflictError } from "../../errors/CustomError.js";
 
-export const getSession = async (studyId) => {
-  const focus = await prisma.FocusSession.findFirst({
+export const getSessions = async (studyId) => {
+  const focus = await prisma.FocusSession.findMany({
     where: {
       studyId,
       status: {
@@ -15,6 +15,7 @@ export const getSession = async (studyId) => {
     select: {
       id: true,
       studyId: true,
+      title: true,
       status: true,
       startTime: true,
       endTime: true,
@@ -29,18 +30,19 @@ export const getSession = async (studyId) => {
   return focus;
 };
 
-export const createSession = async (studyId, durationSec) => {
+export const createSession = async (studyId, durationSec, title) => {
   // 현재 진행중인 집중이 있는지 확인
   const focus = await prisma.FocusSession.findFirst({
     where: {
       studyId,
+      title,
       status: {
         in: ["running", "paused"],
       },
     },
   });
 
-  if (focus) throw new ConflictError("이미 진행 중인 집중 세션이 있습니다");
+  if (focus) throw new ConflictError("이미 사용 중인 세션 제목입니다.");
 
   // 현재 시간에 durationSec 더한 시간을 endTime으로 삽입
   const startTime = new Date();
@@ -52,6 +54,7 @@ export const createSession = async (studyId, durationSec) => {
       durationSec,
       status: "running",
       endTime,
+      title: title.trim(),
     },
   });
 

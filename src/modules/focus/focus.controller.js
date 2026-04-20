@@ -6,9 +6,9 @@ import * as focusService from "./focus.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
 
 // 오늘의 집중 데이터 조회
-export const getSession = asyncHandler(async (req, res) => {
+export const getSessions = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
-  const focus = await focusService.getSession(studyId);
+  const focus = await focusService.getSessions(studyId);
 
   if (!focus) {
     return res.status(200).json({
@@ -26,12 +26,18 @@ export const getSession = asyncHandler(async (req, res) => {
 // 오늘의 집중 신규 생성
 export const createSession = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
-  const durationSec = req.body.durationSec;
+  const { durationSec, title } = req.body;
 
   if (!durationSec || durationSec <= 0)
     throw new BadRequestError("durationSec 데이터 오류");
 
-  const newFocus = await focusService.createSession(studyId, durationSec);
+  if (!title || title === "") throw new BadRequestError("title 데이터 오류");
+
+  const newFocus = await focusService.createSession(
+    studyId,
+    durationSec,
+    title,
+  );
   res.status(201).json({
     success: true,
     data: newFocus,
