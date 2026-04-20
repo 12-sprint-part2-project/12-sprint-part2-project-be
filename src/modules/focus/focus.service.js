@@ -1,8 +1,8 @@
 import prisma from "../../lib/prisma.js";
 import { ConflictError } from "../../errors/CustomError.js";
 
-export const getSession = async (studyId) => {
-  const focus = await prisma.FocusSession.findFirst({
+export const getSessions = async (studyId) => {
+  const focus = await prisma.FocusSession.findMany({
     where: {
       studyId,
       status: {

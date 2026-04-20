@@ -10,7 +10,7 @@ router.param("sessionId", validateId);
 
 router.use(checkStudyExists);
 
-router.get("/", focusController.getSession);
+router.get("/", focusController.getSessions);
 router.post("/", focusController.createSession);
 router.patch("/:sessionId", focusController.updateSession);
 

@@ -6,9 +6,9 @@ import * as focusService from "./focus.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
 
 // 오늘의 집중 데이터 조회
-export const getSession = asyncHandler(async (req, res) => {
+export const getSessions = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
-  const focus = await focusService.getSession(studyId);
+  const focus = await focusService.getSessions(studyId);
 
   if (!focus) {
     return res.status(200).json({
