@@ -75,7 +75,7 @@ model FocusSession {
   studyId     Int         @map("study_id")
   startTime   DateTime    @default(now()) @map("start_time")
   endTime     DateTime    @map("end_time")
-  durationMin Int         @map("duration_min")
+  durationSec Int         @map("duration_sec") 
   pausedAt    DateTime?   @map("paused_at")
   status      FocusStatus
   earnedPoint Int         @default(0) @map("earned_point")
