@@ -18,7 +18,7 @@ export const getSession = async (studyId) => {
       status: true,
       startTime: true,
       endTime: true,
-      durationMin: true,
+      durationSec: true,
       pausedAt: true,
       earnedPoint: true,
     },
@@ -29,7 +29,7 @@ export const getSession = async (studyId) => {
   return focus;
 };
 
-export const createSession = async (studyId, durationMin) => {
+export const createSession = async (studyId, durationSec) => {
   // 현재 진행중인 집중이 있는지 확인
   const focus = await prisma.FocusSession.findFirst({
     where: {
@@ -42,14 +42,14 @@ export const createSession = async (studyId, durationMin) => {
 
   if (focus) throw new ConflictError("이미 진행 중인 집중 세션이 있습니다");
 
-  // 현재 시간에 durationMin을 더한 시간을 endTime으로 삽입
+  // 현재 시간에 durationSec 더한 시간을 endTime으로 삽입
   const startTime = new Date();
-  const endTime = new Date(startTime.getTime() + durationMin * 60 * 1000);
+  const endTime = new Date(startTime.getTime() + durationSec * 60 * 1000);
 
   const newFocus = await prisma.FocusSession.create({
     data: {
       studyId,
-      durationMin,
+      durationSec,
       status: "running",
       endTime,
     },
@@ -68,7 +68,7 @@ export const updateSession = async (studyId, id, status) => {
       id: true,
       studyId: true,
       status: true,
-      durationMin: true,
+      durationSec: true,
       endTime: true,
       pausedAt: true,
     },
@@ -92,7 +92,7 @@ export const updateSession = async (studyId, id, status) => {
   // 중도 포기시 상태는 completed로 들어가지만 지급 포인트는 X / 정상 완료 시 설정 시간 + 기본 3포인트로 정산해서 update
   if (status === "failed") data.earnedPoint = 0;
   else if (status === "completed")
-    data.earnedPoint = Number(focus.durationMin) + 3;
+    data.earnedPoint = Number(focus.durationSec) + 3;
 
   // running 상태일 때 현재시간 기준으로 종료 시간 재계산
   if (status === "running") {
