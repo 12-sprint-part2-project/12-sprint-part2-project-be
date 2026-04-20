@@ -73,6 +73,7 @@ model HabitLog {
 model FocusSession {
   id          Int         @id @default(autoincrement())
   studyId     Int         @map("study_id")
+  title       String?     @map("title")
   startTime   DateTime    @default(now()) @map("start_time")
   endTime     DateTime    @map("end_time")
   durationSec Int         @map("duration_sec") 
