@@ -81,13 +81,18 @@ export const updateSession = async (studyId, id, status) => {
   /* 상태에 따라 업데이트 되어야 할 필드가 달라지기 때문에 let으로 선언
    ** running과 completed일땐 pausedAt을 null 처리
    ** completed 처리 되었을 때 포인트 제공
+   ** 0418 - status가 failed로 들어올 경우 중도 포기로 간주 -> completed로 처리 후 포인트 지급X
    */
   let data = {
-    status: status,
+    status: status === "failed" ? "completed" : status,
     updatedAt: new Date(),
     pausedAt: status === "paused" ? new Date() : null,
-    earnedPoint: status === "completed" ? 8 : 0,
   };
+
+  // 중도 포기시 상태는 completed로 들어가지만 지급 포인트는 X / 정상 완료 시 설정 시간 + 기본 3포인트로 정산해서 update
+  if (status === "failed") data.earnedPoint = 0;
+  else if (status === "completed")
+    data.earnedPoint = Number(data.durationMin) + 3;
 
   // running 상태일 때 현재시간 기준으로 종료 시간 재계산
   if (status === "running") {
