@@ -92,7 +92,7 @@ export const updateSession = async (studyId, id, status) => {
   // 중도 포기시 상태는 completed로 들어가지만 지급 포인트는 X / 정상 완료 시 설정 시간 + 기본 3포인트로 정산해서 update
   if (status === "failed") data.earnedPoint = 0;
   else if (status === "completed")
-    data.earnedPoint = Number(data.durationMin) + 3;
+    data.earnedPoint = Number(focus.durationMin) + 3;
 
   // running 상태일 때 현재시간 기준으로 종료 시간 재계산
   if (status === "running") {
