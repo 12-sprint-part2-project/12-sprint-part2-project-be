@@ -12,7 +12,7 @@ export const getTodayHabits = async (studyId) => {
     where: {
       studyId,
       startAt: { lte: today },
-      OR: [{ endAt: null }, { endAt: { gte: today } }],
+      OR: [{ endAt: null }, { endAt: { gt: today } }],
     },
     include: {
       habitLogs: {
@@ -203,7 +203,7 @@ export const deleteHabit = async (studyId, habitId) => {
       id: habitId,
     },
     data: {
-      endAt: new Date(),
+      endAt: getTodayKST(),
     },
   });
 };
@@ -241,7 +241,7 @@ export const getWeeklyLogs = async (studyId, date) => {
     where: {
       studyId,
       startAt: { lte: endDate },
-      OR: [{ endAt: null }, { endAt: { gte: startDate } }],
+      OR: [{ endAt: null }, { endAt: { gt: endDate } }],
     },
     orderBy: { createdAt: "asc" },
   });
@@ -292,7 +292,7 @@ export const getWeeklyLogs = async (studyId, date) => {
       logs: weekDates.map((dateStr) => {
         const isActive =
           habitStartDateStr <= dateStr &&
-          (habitEndDateStr === null || habitEndDateStr >= dateStr);
+          (habitEndDateStr === null || habitEndDateStr > dateStr);
 
         if (!isActive) {
           return {
