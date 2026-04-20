@@ -3,18 +3,7 @@ import {
   BadRequestError,
   HabitNotFoundError,
 } from "../../errors/CustomError.js";
-
-// KST 기준 "오늘 날짜" 생성 (안 꼬이는 방식)
-const getTodayKST = () => {
-  const now = new Date();
-
-  // 한국 시간 기준으로 YYYY-MM-DD 문자열 만들기
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  const dateStr = kst.toISOString().slice(0, 10);
-
-  // DB용 Date 객체 (날짜만 의미)
-  return new Date(dateStr);
-};
+import { getTodayKST } from "../../common/utils/date.js";
 
 export const getTodayHabits = async (studyId) => {
   // 오늘 날짜 (시간 제거)
@@ -128,8 +117,8 @@ export const updateHabit = async (studyId, habitId, data) => {
   const { habitName, startAt } = data;
 
   // 수정할 값이 없으면 잘못된 요청
-  const hasHabitName = habitName !== undefined;
-  const hasStartAt = startAt !== undefined;
+  const hasHabitName = habitName !== undefined && habitName !== null;
+  const hasStartAt = startAt !== undefined && startAt !== null;
 
   if (!hasHabitName && !hasStartAt) {
     throw new BadRequestError("수정할 값이 없습니다.");
