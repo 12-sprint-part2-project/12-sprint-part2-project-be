@@ -13,7 +13,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", //TODO: 배포된 프론트 주소로 변경 필요. 일단 로컬 주소로 함
+    credentials: true, //반드시 true로 해야 프론트에서 쿠키를 받을 수 있음.
+  }),
+);
 app.use(express.json());
 
 /* 세션을 사용하기 위한 설정 */
