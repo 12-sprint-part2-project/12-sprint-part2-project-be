@@ -43,7 +43,7 @@ export const createHabit = async (studyId, data) => {
     data: {
       studyId,
       habitName: habitName.trim(),
-      startAt: new Date(),
+      startAt: getTodayKST(),
     },
   });
 
