@@ -15,6 +15,7 @@ export const getSession = async (studyId) => {
     select: {
       id: true,
       studyId: true,
+      title: true,
       status: true,
       startTime: true,
       endTime: true,
@@ -29,11 +30,12 @@ export const getSession = async (studyId) => {
   return focus;
 };
 
-export const createSession = async (studyId, durationSec) => {
+export const createSession = async (studyId, durationSec, title) => {
   // 현재 진행중인 집중이 있는지 확인
   const focus = await prisma.FocusSession.findFirst({
     where: {
       studyId,
+      title,
       status: {
         in: ["running", "paused"],
       },
@@ -52,6 +54,7 @@ export const createSession = async (studyId, durationSec) => {
       durationSec,
       status: "running",
       endTime,
+      title: title.trim(),
     },
   });
 
