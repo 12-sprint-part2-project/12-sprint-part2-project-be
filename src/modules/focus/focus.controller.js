@@ -26,12 +26,12 @@ export const getSession = asyncHandler(async (req, res) => {
 // 오늘의 집중 신규 생성
 export const createSession = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
-  const durationMin = req.body.durationMin;
+  const durationSec = req.body.durationSec;
 
-  if (!durationMin || durationMin <= 0)
-    throw new BadRequestError("durationMin 데이터 오류");
+  if (!durationSec || durationSec <= 0)
+    throw new BadRequestError("durationSec 데이터 오류");
 
-  const newFocus = await focusService.createSession(studyId, durationMin);
+  const newFocus = await focusService.createSession(studyId, durationSec);
   res.status(201).json({
     success: true,
     data: newFocus,
