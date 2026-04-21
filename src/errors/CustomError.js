@@ -66,3 +66,21 @@ export class ConflictError extends AppError {
     super(message, { status: 409, code: ERROR_CODES.CONFLICT });
   }
 }
+
+export class DuplicateFocusTitleError extends AppError {
+  constructor() {
+    super("이미 사용 중인 집중 세션 제목입니다.", {
+      status: 409,
+      code: ERROR_CODES.DUPLICATE_FOCUS_TITLE,
+    });
+  }
+}
+
+export class FocusAlreadyCompletedError extends AppError {
+  constructor() {
+    super("종료된 집중 상태는 변경할 수 없습니다", {
+      status: 409,
+      code: ERROR_CODES.FOCUS_ALREADY_COMPLETED,
+    });
+  }
+}
