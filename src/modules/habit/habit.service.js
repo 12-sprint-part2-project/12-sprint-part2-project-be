@@ -8,10 +8,12 @@ import { getTodayKST } from "../../common/utils/date.js";
 export const getTodayHabits = async (studyId) => {
   // 오늘 날짜 (시간 제거)
   const today = getTodayKST();
+  const now = new Date();
+
   const habits = await prisma.habit.findMany({
     where: {
       studyId,
-      startAt: { lte: today },
+      startAt: { lte: now },
       OR: [{ endAt: null }, { endAt: { gt: today } }],
     },
     include: {
