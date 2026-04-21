@@ -1,5 +1,21 @@
 import prisma from "../../lib/prisma.js";
 
+const countedEmojis = (emojis, limit = null) => {
+  const countMap = {};
+  for (const { emoji } of emojis) {
+    countMap[emoji] = (countMap[emoji] || 0) + 1;
+  }
+
+  const sorted = Object.entries(countMap)
+    .map(([emoji, count]) => ({
+      emoji,
+      count,
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  return limit ? sorted.slice(0, limit) : sorted;
+};
+
 export const getStudies = async (data) => {
   const page = Number(data.page) || 1; // 현재 페이지 초기 설정
   const limit = Number(data.limit) || 6; // 페이지당 출력 수 초기 설정
@@ -13,7 +29,11 @@ export const getStudies = async (data) => {
 
   if (keyword) {
     // 스터디 제목에 검색키워드 포함된 데이터만
-    where.OR = [{ title: { contains: keyword, mode: "insensitive" } }];
+    where.OR = [
+      { title: { contains: keyword, mode: "insensitive" } },
+      { nickname: { contains: keyword, mode: "insensitive" } },
+      { description: { contains: keyword, mode: "insensitive" } },
+    ];
   }
 
   /**
@@ -40,10 +60,13 @@ export const getStudies = async (data) => {
       },
     });
 
-    const allStudies = allStudiesRaw.map(({ focusSessions, ...rest }) => ({
-      ...rest,
-      points: focusSessions.reduce((sum, s) => sum + s.earnedPoint, 0),
-    }));
+    const allStudies = allStudiesRaw.map(
+      ({ focusSessions, emojis, ...rest }) => ({
+        ...rest,
+        points: focusSessions.reduce((sum, s) => sum + s.earnedPoint, 0),
+        emojis: countedEmojis(emojis, 3),
+      }),
+    );
 
     allStudies.sort((a, b) =>
       order === "desc" ? b.points - a.points : a.points - b.points,
@@ -73,9 +96,10 @@ export const getStudies = async (data) => {
     prisma.study.count({ where }),
   ]);
 
-  const studies = studiesRaw.map(({ focusSessions, ...rest }) => ({
+  const studies = studiesRaw.map(({ focusSessions, emojis, ...rest }) => ({
     ...rest,
     points: focusSessions.reduce((sum, s) => sum + s.earnedPoint, 0),
+    emojis: countedEmojis(emojis, 3),
   }));
 
   const has_more = skip + limit < total;
@@ -124,7 +148,7 @@ export const getStudyById = async (id) => {
           earnedPoint: true,
         },
       },
-      emojis: true,
+      // emojis: true,
     },
   });
 
@@ -171,7 +195,7 @@ export const getEmoji = async (studyId) => {
     where: { studyId },
   });
 
-  return res;
+  return countedEmojis(res);
 };
 
 export const addEmoji = async (studyId, emoji) => {
