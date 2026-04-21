@@ -25,7 +25,7 @@ export const getStudies = asyncHandler(async (req, res) => {
 });
 
 export const getStudyById = asyncHandler(async (req, res) => {
-  const { studyId } = req.params;
+  const studyId = req.studyId;
 
   const study = await studyService.getStudyById(studyId);
 
@@ -58,7 +58,7 @@ export const createStudy = asyncHandler(async (req, res) => {
 });
 
 export const updateStudy = asyncHandler(async (req, res) => {
-  const { studyId } = req.params;
+  const studyId = req.studyId;
   const { title, description, theme, password, nickname } = req.body;
 
   if (!title || !theme || !password || !nickname) {
@@ -79,7 +79,7 @@ export const updateStudy = asyncHandler(async (req, res) => {
 });
 
 export const deleteStudy = asyncHandler(async (req, res) => {
-  const { studyId } = req.params;
+  const studyId = req.studyId;
 
   await studyService.deleteStudy(studyId);
 
@@ -87,7 +87,7 @@ export const deleteStudy = asyncHandler(async (req, res) => {
 });
 
 export const verifyPassword = asyncHandler(async (req, res) => {
-  const { studyId } = req.params;
+  const studyId = req.studyId;
   const { password } = req.body;
 
   const isCorrect = await studyService.verifyPassword(studyId, password); //boolean값을 리턴 받는다. true면 일치, false면 불일치.
@@ -111,7 +111,7 @@ export const verifyPassword = asyncHandler(async (req, res) => {
 
 //세션에 있는 스터디 id인지 점검
 export const checkSession = asyncHandler(async (req, res) => {
-  const { studyId } = req.params;
+  const studyId = req.studyId;
   const isAuthorized = req.session.authorizedStudies?.includes(studyId);
   if (!isAuthorized) {
     //세션에 없는 스터디 id 일시, 에러를 리턴한다. (그런데 그냥 응답으로 주는 게 프론트가 편하다는데, 뭐가 좋을까?)
@@ -120,6 +120,28 @@ export const checkSession = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true });
 });
 
+export const getEmoji = asyncHandler(async (req, res) => {
+  const studyId = req.studyId;
+
+  const emojis = await studyService.getEmoji(studyId);
+
+  res.status(200).json({ success: true, data: emojis });
+});
+
 export const addEmoji = asyncHandler(async (req, res) => {
-  res.status(201).json({ message: "TODO" });
+  const studyId = req.studyId;
+  const { emoji } = req.body;
+
+  //에러 핸들링 (validation)
+  if (!studyId) {
+    throw new BadRequestError("존재하지 않는 스터디입니다.");
+  }
+
+  if (!emoji) {
+    throw new BadRequestError("추가할 이모지가 없습니다.");
+  }
+
+  const addedEmoji = await studyService.addEmoji(studyId, emoji);
+
+  res.status(201).json({ success: true, data: addedEmoji });
 });

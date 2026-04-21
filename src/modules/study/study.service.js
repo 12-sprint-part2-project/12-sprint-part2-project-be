@@ -99,10 +99,13 @@ export const getStudyById = async (id) => {
   sunday.setHours(23, 59, 59, 999);
 
   const res = await prisma.study.findUniqueOrThrow({
-    where: { id: id },
+    where: { id },
     omit: { password: true },
     include: {
       habits: {
+        orderBy: {
+          createdAt: "asc",
+        },
         include: {
           // habitLogs 까지 가져와야함
           habitLogs: {
@@ -163,4 +166,18 @@ export const verifyPassword = async (id, password) => {
   return isCorrect;
 };
 
-export const addEmoji = async (studyId, emoji) => {};
+export const getEmoji = async (studyId) => {
+  const res = await prisma.emoji.findMany({
+    where: { studyId },
+  });
+
+  return res;
+};
+
+export const addEmoji = async (studyId, emoji) => {
+  const res = await prisma.emoji.create({
+    data: { studyId, emoji },
+  });
+
+  return res;
+};
