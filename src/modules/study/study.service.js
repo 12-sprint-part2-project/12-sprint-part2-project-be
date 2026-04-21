@@ -148,11 +148,13 @@ export const getStudyById = async (id) => {
           earnedPoint: true,
         },
       },
-      // emojis: true,
+      emojis: true,
     },
   });
 
-  return res;
+  const emojis = countedEmojis(res.emojis, 3);
+
+  return { ...res, emojis };
 };
 
 export const createStudy = async (data) => {
