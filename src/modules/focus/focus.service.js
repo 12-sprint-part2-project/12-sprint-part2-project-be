@@ -1,5 +1,8 @@
 import prisma from "../../lib/prisma.js";
-import { ConflictError } from "../../errors/CustomError.js";
+import {
+  FocusAlreadyCompletedError,
+  DuplicateFocusTitleError,
+} from "../../errors/CustomError.js";
 
 export const getSessions = async (studyId) => {
   const focus = await prisma.FocusSession.findMany({
@@ -42,7 +45,7 @@ export const createSession = async (studyId, durationSec, title) => {
     },
   });
 
-  if (focus) throw new ConflictError("이미 사용 중인 세션 제목입니다.");
+  if (focus) throw new DuplicateFocusTitleError();
 
   // 현재 시간에 durationSec 더한 시간을 endTime으로 삽입
   const startTime = new Date();
@@ -77,9 +80,7 @@ export const updateSession = async (studyId, id, status) => {
     },
   });
 
-  if (focus.status === "completed") {
-    throw new ConflictError("종료된 집중 상태는 변경할 수 없습니다.");
-  }
+  if (focus.status === "completed") throw new FocusAlreadyCompletedError();
 
   /* 상태에 따라 업데이트 되어야 할 필드가 달라지기 때문에 let으로 선언
    ** running과 completed일땐 pausedAt을 null 처리
