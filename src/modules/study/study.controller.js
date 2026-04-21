@@ -61,7 +61,7 @@ export const updateStudy = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
   const { title, description, theme, password, nickname } = req.body;
 
-  if (!title || !theme || !password || !nickname) {
+  if (!title || !theme || !nickname) {
     throw new BadRequestError(
       "스터디 수정에 실패했습니다. 유효하지 않은 입력값입니다.",
     );
