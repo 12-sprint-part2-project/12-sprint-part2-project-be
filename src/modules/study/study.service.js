@@ -68,9 +68,17 @@ export const getStudies = async (data) => {
       }),
     );
 
-    allStudies.sort((a, b) =>
-      order === "desc" ? b.points - a.points : a.points - b.points,
-    );
+    allStudies.sort((a, b) => {
+      if (order === "desc") {
+        return b.points !== a.points
+          ? b.points - a.points
+          : new Date(a.createdAt) - new Date(b.createdAt);
+      } else {
+        return a.points !== b.points
+          ? a.points - b.points
+          : new Date(a.createdAt) - new Date(b.createdAt);
+      }
+    });
 
     const total = allStudies.length;
     const studies = allStudies.slice(skip, skip + limit);
