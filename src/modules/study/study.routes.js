@@ -8,6 +8,7 @@ const router = express.Router();
 router.param("studyId", validateId);
 
 router.get("/", studyController.getStudies);
+router.get("/recent", studyController.getRecentStudies);
 router.post("/", studyController.createStudy);
 router.get("/:studyId", checkStudyExists, studyController.getStudyById);
 router.patch("/:studyId", checkStudyExists, studyController.updateStudy);

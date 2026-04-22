@@ -111,6 +111,37 @@ export const getStudies = async (data) => {
   };
 };
 
+export const getRecentStudies = async (ids) => {
+  const res = await Promise.all(
+    ids.map(async (id) => {
+      const study = await prisma.study.findUniqueOrThrow({
+        where: { id },
+        omit: { password: true },
+        include: {
+          focusSessions: {
+            where: { status: "completed" },
+            select: {
+              earnedPoint: true,
+            },
+          },
+          emojis: true,
+        },
+      });
+
+      const emojis = countedEmojis(study.emojis, 3);
+
+      const points = study.focusSessions.reduce(
+        (sum, s) => sum + s.earnedPoint,
+        0,
+      );
+
+      return { ...study, points, emojis };
+    }),
+  );
+
+  return res;
+};
+
 export const getStudyById = async (id) => {
   const today = new Date();
   const day = today.getDay(); // 오늘이 속한 요일(숫자로 받음)
