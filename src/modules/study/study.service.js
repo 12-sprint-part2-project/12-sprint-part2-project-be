@@ -112,32 +112,31 @@ export const getStudies = async (data) => {
 };
 
 export const getRecentStudies = async (ids) => {
-  const res = await Promise.all(
-    ids.map(async (id) => {
-      const study = await prisma.study.findUniqueOrThrow({
-        where: { id },
-        omit: { password: true },
-        include: {
-          focusSessions: {
-            where: { status: "completed" },
-            select: {
-              earnedPoint: true,
-            },
-          },
-          emojis: true,
+  const studies = await prisma.study.findMany({
+    where: { id: { in: ids } },
+    omit: { password: true },
+    include: {
+      focusSessions: {
+        where: { status: "completed" },
+        select: {
+          earnedPoint: true,
         },
-      });
+      },
+      emojis: true,
+    },
+  });
 
-      const emojis = countedEmojis(study.emojis, 3);
+  const sorted = ids.map((id) => studies.find((study) => study.id === id));
 
-      const points = study.focusSessions.reduce(
-        (sum, s) => sum + s.earnedPoint,
-        0,
-      );
+  const res = sorted.map((study) => {
+    const emojis = countedEmojis(study.emojis, 3);
+    const points = study.focusSessions.reduce(
+      (sum, s) => sum + s.earnedPoint,
+      0,
+    );
 
-      return { ...study, points, emojis };
-    }),
-  );
+    return { ...study, points, emojis };
+  });
 
   return res;
 };
