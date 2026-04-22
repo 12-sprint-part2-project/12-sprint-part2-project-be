@@ -13,12 +13,25 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://forest-of-study.vercel.app",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173", //TODO: 배포된 프론트 주소로 변경 필요. 일단 로컬 주소로 함
-    credentials: true, //반드시 true로 해야 프론트에서 쿠키를 받을 수 있음.
+    origin: function (origin, callback) {
+      // origin이 없거나(Postman 등) 목록에 있으면 허용
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   }),
 );
+
 app.use(express.json());
 
 /* 세션을 사용하기 위한 설정 */
@@ -29,7 +42,10 @@ app.use(
     saveUninitialized: false, // 초기화되지 않은 세션을 저장할지 여부 (보통 false 권장)
     cookie: {
       httpOnly: true, // 자바스크립트로 쿠키 접근 방지 (보안!)
-      secure: false, // 배포 전(HTTP)에는 false로 설정
+      // 배포 환경(production)일 때는 secure를 true로 (HTTPS 적용)
+      secure: process.env.NODE_ENV === "production",
+      // 배포 환경에서는 크로스 도메인 쿠키 전달을 위해 아래 설정이 필요할 수 있음
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 1000 * 60 * 60, // 쿠키 유효 시간 (현재 1시간 설정)
     },
   }),
