@@ -26,9 +26,12 @@ export const getStudies = asyncHandler(async (req, res) => {
 
 export const getRecentStudies = asyncHandler(async (req, res) => {
   const { ids } = req.query;
-  const idList = ids.split(",").map((id) => Number(id));
+  let result = [];
 
-  const result = await studyService.getRecentStudies(idList);
+  if (ids) {
+    const idList = ids.split(",").map((id) => Number(id));
+    result = await studyService.getRecentStudies(idList);
+  }
 
   res.status(200).json({ success: true, data: result });
 });
