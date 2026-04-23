@@ -128,6 +128,8 @@ export const verifyPassword = asyncHandler(async (req, res) => {
 
 //세션에 있는 스터디 id인지 점검
 export const checkSession = asyncHandler(async (req, res) => {
+  const studyId = req.studyId;
+
   const sessionId = req.headers["x-session-id"];
 
   // 세션이 없으면 실패
