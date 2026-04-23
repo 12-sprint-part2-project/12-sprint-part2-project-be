@@ -108,10 +108,11 @@ export const verifyPassword = asyncHandler(async (req, res) => {
     throw new BadRequestError("비밀번호가 올바르지 않습니다.");
   }
 
+  //  sessionId에 studyId 포함
   res.status(200).json({
     success: true,
     data: {
-      sessionId: "temp-" + Date.now(),
+      sessionId: `${Date.now()}-${studyId}`,
     },
   });
 });
@@ -119,14 +120,18 @@ export const verifyPassword = asyncHandler(async (req, res) => {
 //세션에 있는 스터디 id인지 점검
 export const checkSession = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
-
   const sessionId = req.headers["x-session-id"];
 
   if (!sessionId) {
     throw new AuthenticationError();
   }
 
-  // 임시 방식: sessionId 존재하면 인증된 것으로 간주
+  // localStorage에 저장된 값이 해당 studyId를 포함하는지 확인
+  const authorizedStudyId = Number(sessionId.split("-")[1]);
+  if (authorizedStudyId !== studyId) {
+    throw new AuthenticationError();
+  }
+
   res.status(200).json({ success: true });
 });
 
