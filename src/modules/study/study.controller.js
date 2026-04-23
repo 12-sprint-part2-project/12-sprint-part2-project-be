@@ -116,19 +116,32 @@ export const verifyPassword = asyncHandler(async (req, res) => {
   if (!req.session.authorizedStudies.includes(studyId)) {
     req.session.authorizedStudies.push(studyId);
   }
-  res
-    .status(200)
-    .json({ success: true, data: { session: req.session.authorizedStudies } }); //현재 세션에 어떤 스터디 id가 들어있는지도 함께 응답으로 보냄.
+  res.status(200).json({
+    success: true,
+    data: {
+      session: req.session.authorizedStudies,
+      sessionId: req.sessionID, // 추가
+    },
+  });
+  //현재 세션에 어떤 스터디 id가 들어있는지도 함께 응답으로 보냄.
 });
 
 //세션에 있는 스터디 id인지 점검
 export const checkSession = asyncHandler(async (req, res) => {
-  const studyId = req.studyId;
-  const isAuthorized = req.session.authorizedStudies?.includes(studyId);
-  if (!isAuthorized) {
-    //세션에 없는 스터디 id 일시, 에러를 리턴한다. (그런데 그냥 응답으로 주는 게 프론트가 편하다는데, 뭐가 좋을까?)
+  const sessionId = req.headers["x-session-id"];
+
+  // 세션이 없으면 실패
+  if (!sessionId) {
     throw new AuthenticationError();
   }
+
+  // express-session이 이미 req.session에 복원 못하는 상황 대비 fallback
+  const isAuthorized = req.session?.authorizedStudies?.includes(studyId);
+
+  if (!isAuthorized) {
+    throw new AuthenticationError();
+  }
+
   res.status(200).json({ success: true });
 });
 
