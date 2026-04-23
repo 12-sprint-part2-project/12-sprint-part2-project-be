@@ -102,28 +102,18 @@ export const verifyPassword = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
   const { password } = req.body;
 
-  const isCorrect = await studyService.verifyPassword(studyId, password); //boolean값을 리턴 받는다. true면 일치, false면 불일치.
+  const isCorrect = await studyService.verifyPassword(studyId, password);
 
   if (!isCorrect) {
     throw new BadRequestError("비밀번호가 올바르지 않습니다.");
   }
-  /*세션에 스터디 id를 저장하는 로직*/
-  // 세션에 인증된 스터디 목록이 없으면 빈 배열 생성
-  if (!req.session.authorizedStudies) {
-    req.session.authorizedStudies = [];
-  }
-  //비밀번호가 일치할 시, 현재 스터디 id를, 세션 배열에 추가
-  if (!req.session.authorizedStudies.includes(studyId)) {
-    req.session.authorizedStudies.push(studyId);
-  }
+
   res.status(200).json({
     success: true,
     data: {
-      session: req.session.authorizedStudies,
-      sessionId: req.sessionID, // 추가
+      sessionId: "temp-" + Date.now(),
     },
   });
-  //현재 세션에 어떤 스터디 id가 들어있는지도 함께 응답으로 보냄.
 });
 
 //세션에 있는 스터디 id인지 점검
@@ -132,18 +122,11 @@ export const checkSession = asyncHandler(async (req, res) => {
 
   const sessionId = req.headers["x-session-id"];
 
-  // 세션이 없으면 실패
   if (!sessionId) {
     throw new AuthenticationError();
   }
 
-  // express-session이 이미 req.session에 복원 못하는 상황 대비 fallback
-  const isAuthorized = req.session?.authorizedStudies?.includes(studyId);
-
-  if (!isAuthorized) {
-    throw new AuthenticationError();
-  }
-
+  // 임시 방식: sessionId 존재하면 인증된 것으로 간주
   res.status(200).json({ success: true });
 });
 
