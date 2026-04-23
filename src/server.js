@@ -14,25 +14,17 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 const allowedOrigins = [
-  "http://localhost:5173",
-  "yooseohyeons-projects.vercel.app",
+  "localhost:5173",
+  "vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (
-        !origin ||
-        allowedOrigins.some((o) => origin.includes(o))
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+origin: function (origin, callback) {
+  if (!origin || allowedOrigins.some(o => origin.includes(o))) {
+    callback(null, true);
+  } else {
+    callback(new Error("Not allowed by CORS"));
+  }
+}
 
 app.use(express.json());
 
