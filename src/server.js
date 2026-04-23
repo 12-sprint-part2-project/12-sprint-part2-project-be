@@ -41,7 +41,7 @@ app.use(
     resave: false, // 세션 수정사항이 없어도 다시 저장할지 여부
     saveUninitialized: false, // 초기화되지 않은 세션을 저장할지 여부 (보통 false 권장)
     cookie: {
-      httpOnly: true, // 자바스크립트로 쿠키 접근 방지 (보안!)
+      httpOnly: true,
       // 배포 환경(production)일 때는 secure를 true로 (HTTPS 적용)
       secure: process.env.NODE_ENV === "production",
       // 배포 환경에서는 크로스 도메인 쿠키 전달을 위해 아래 설정이 필요할 수 있음
