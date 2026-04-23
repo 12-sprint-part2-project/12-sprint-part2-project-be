@@ -134,7 +134,9 @@ export const getRecentStudies = async (ids) => {
     },
   });
 
-  const sorted = ids.map((id) => studies.find((study) => study.id === id));
+  const sorted = ids
+    .map((id) => studies.find((study) => study.id === id))
+    .filter((study) => Boolean(study));
 
   const res = sorted.map((study) => {
     const emojis = countedEmojis(study.emojis, 3);
