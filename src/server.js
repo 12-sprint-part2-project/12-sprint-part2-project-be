@@ -18,22 +18,22 @@ const allowedOrigins = [
   "vercel.app",
 ];
 
+
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) {
+    origin: (origin, callback) => {
+      console.log("CORS origin:", origin);
+
+      if (!origin) return callback(null, true);
+
+      if (
+        origin.includes("localhost") ||
+        origin.includes("vercel.app")
+      ) {
         return callback(null, true);
       }
 
-      const allowed = allowedOrigins.some((o) =>
-        origin.includes(o)
-      );
-
-      if (allowed) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
+      return callback(null, true); // 일단 전부 허용 (디버깅)
     },
     credentials: true,
   })
