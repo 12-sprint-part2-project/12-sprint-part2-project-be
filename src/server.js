@@ -18,13 +18,26 @@ const allowedOrigins = [
   "vercel.app",
 ];
 
-origin: function (origin, callback) {
-  if (!origin || allowedOrigins.some(o => origin.includes(o))) {
-    callback(null, true);
-  } else {
-    callback(new Error("Not allowed by CORS"));
-  }
-}
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const allowed = allowedOrigins.some((o) =>
+        origin.includes(o)
+      );
+
+      if (allowed) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
