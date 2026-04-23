@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 8080;
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://forest-of-study.vercel.app",
+  "https://12-sprint-part2-project-fe-git-ref-22a2d8-yooseohyeons-projects.vercel.app",
 ];
 
 app.use(
