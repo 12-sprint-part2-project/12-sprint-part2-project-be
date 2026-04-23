@@ -15,21 +15,23 @@ const PORT = process.env.PORT || 8080;
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://12-sprint-part2-project-fe-git-ref-22a2d8-yooseohyeons-projects.vercel.app",
+  "yooseohyeons-projects.vercel.app",
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // origin이 없거나(Postman 등) 목록에 있으면 허용
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      if (
+        !origin ||
+        allowedOrigins.some((o) => origin.includes(o))
+      ) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
-  }),
+  })
 );
 
 app.use(express.json());
