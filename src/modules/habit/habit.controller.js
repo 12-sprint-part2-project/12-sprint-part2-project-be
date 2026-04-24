@@ -1,9 +1,10 @@
 import * as habitService from "./habit.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
 
+// 오늘의 습관 조회
 export const getTodayHabits = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
-  const habits = await habitService.getTodayHabits(studyId);
+  const habits = await habitService.getTodayHabits(studyId); // 오늘의 습관 조회 로직은 service에서. 컨트롤러는 studyId만 넘김
 
   res.status(200).json({
     success: true,
@@ -11,12 +12,13 @@ export const getTodayHabits = asyncHandler(async (req, res) => {
   });
 });
 
+// 습관 생성
 export const createHabit = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
-  const { habitName } = req.body;
+  const { habitName } = req.body; // 요청 바디에서 생성할 습관 이름 꺼내기
   const newHabit = await habitService.createHabit(studyId, {
     habitName,
-  });
+  }); // service로 studyId와 habitName 전달
 
   res.status(201).json({
     success: true,
@@ -24,6 +26,7 @@ export const createHabit = asyncHandler(async (req, res) => {
   });
 });
 
+// 오늘의 습관 체크/해제
 export const toggleHabit = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
   const habitId = req.params.habitId;
@@ -40,6 +43,7 @@ export const toggleHabit = asyncHandler(async (req, res) => {
   });
 });
 
+// 습관 수정
 export const updateHabit = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
   const habitId = req.params.habitId;
@@ -57,6 +61,7 @@ export const updateHabit = asyncHandler(async (req, res) => {
   });
 });
 
+// 습관 삭제
 export const deleteHabit = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
   const habitId = req.params.habitId;
@@ -66,6 +71,7 @@ export const deleteHabit = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
+// 주간 습관 기록 조회
 export const getWeeklyLogs = asyncHandler(async (req, res) => {
   const studyId = req.studyId;
   const { date } = req.query;
