@@ -3,12 +3,13 @@ import {
   BadRequestError,
   HabitNotFoundError,
 } from "../../errors/CustomError.js";
-import { getTodayKST } from "../../common/utils/date.js";
+import { getTodayKST } from "../../common/utils/date.js"; // 오늘 날짜를 KST기준으로 가져오는 함수. 습관 조회,생성,체크/해제,삭제에서 날짜 기준으로 사용
 
+// 오늘의 습관 조회
 export const getTodayHabits = async (studyId) => {
   // 오늘 날짜 (시간 제거)
-  const today = getTodayKST();
-  const now = new Date();
+  const today = getTodayKST(); // habit_logs의 logDate와 비교, "오늘 체크 기록이 있는지"
+  const now = new Date(); // 현재 시각, habits의 startAt과 비교, startAt이 현재 시각보다 이전이거나 같아야 오늘 조회 대상.
 
   const habits = await prisma.habit.findMany({
     where: {
@@ -28,10 +29,11 @@ export const getTodayHabits = async (studyId) => {
     id: habit.id,
     habitName: habit.habitName,
     isCompleted:
-      habit.habitLogs.length > 0 && habit.habitLogs[0].completedAt !== null,
+      habit.habitLogs.length > 0 && habit.habitLogs[0].completedAt !== null, // 오늘 로그가 존재하고, 그 로그의 completedAt에 시간이 들어있으면 체크 완료로 판단
   }));
 };
 
+// 습관 생성
 export const createHabit = async (studyId, data) => {
   const { habitName } = data;
 
@@ -52,6 +54,7 @@ export const createHabit = async (studyId, data) => {
   return newHabit;
 };
 
+// 체크/해제
 export const toggleHabit = async (studyId, habitId, data) => {
   const { completed } = data;
 
@@ -74,7 +77,7 @@ export const toggleHabit = async (studyId, habitId, data) => {
     throw new HabitNotFoundError();
   }
 
-  // 3. 오늘 날짜 생성 (시간 제거해서 날짜 기준으로 비교)
+  // 3. 오늘 로그를 찾기 위한 기준 날짜
   const today = getTodayKST();
 
   // 4. 오늘 해당 habit의 로그가 이미 있는지 조회
@@ -115,10 +118,10 @@ export const toggleHabit = async (studyId, habitId, data) => {
   return result;
 };
 
+// 습관 수정
 export const updateHabit = async (studyId, habitId, data) => {
   const { habitName, startAt } = data;
 
-  // 수정할 값이 없으면 잘못된 요청
   const hasHabitName = habitName !== undefined && habitName !== null;
   const hasStartAt = startAt !== undefined && startAt !== null;
 
@@ -179,6 +182,7 @@ export const updateHabit = async (studyId, habitId, data) => {
   return updatedHabit;
 };
 
+// 습관 삭제(소프트 딜리트)
 export const deleteHabit = async (studyId, habitId) => {
   // 1. 해당 스터디에 속한 습관이 실제로 존재하는지 확인
   const habit = await prisma.habit.findFirst({
@@ -188,8 +192,7 @@ export const deleteHabit = async (studyId, habitId) => {
     },
   });
 
-  // 2. 없으면 습관 없음 에러
-  //    - 스터디가 없거나, 해당 스터디에 이 습관이 없거나
+  // 2. 없으면 습관 없음 에러(스터디가 없거나, 해당 스터디에 이 습관이 없거나)
   if (!habit) {
     throw new HabitNotFoundError();
   }
@@ -210,6 +213,7 @@ export const deleteHabit = async (studyId, habitId) => {
   });
 };
 
+// 주간 습관 기록 조회
 export const getWeeklyLogs = async (studyId, date) => {
   if (!date) {
     throw new BadRequestError("date 쿼리 파라미터는 필수입니다.");
@@ -228,13 +232,14 @@ export const getWeeklyLogs = async (studyId, date) => {
   // 일요일=0, 월요일=1, ... 토요일=6
   const day = baseDate.getDay();
 
-  // 월요일 시작 기준으로 이번 주 시작일 계산
+  // 월요일 시작 기준으로 맞추기
   const diffToMonday = day === 0 ? 6 : day - 1;
 
+  // 이번주 월요일 계산
   const startDate = new Date(baseDate);
   startDate.setDate(baseDate.getDate() - diffToMonday);
 
-  // 종료일
+  // 이번주 일요일 계산
   const endDate = new Date(startDate);
   endDate.setDate(startDate.getDate() + 6);
 
@@ -269,6 +274,7 @@ export const getWeeklyLogs = async (studyId, date) => {
     },
   });
 
+  // 7일 날짜 배열 생성
   const weekDates = Array.from({ length: 7 }, (_, index) => {
     const currentDate = new Date(startDate);
     currentDate.setDate(startDate.getDate() + index);
