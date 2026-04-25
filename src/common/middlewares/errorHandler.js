@@ -3,9 +3,9 @@ import { AppError } from "../../errors/CustomError.js";
 
 const PRISMA_ERROR_MAP = {
   P2003: {
-    status: 500,
+    status: 400,
     code: ERROR_CODES.INTERNAL_ERROR,
-    message: "데이터 관계 처리 중 오류가 발생했습니다",
+    message: "참조하는 리소스가 존재하지 않습니다",
   },
   P2002: {
     status: 409,
