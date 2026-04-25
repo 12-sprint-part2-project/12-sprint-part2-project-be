@@ -1,7 +1,4 @@
-import {
-  FocusNotFoundError,
-  BadRequestError,
-} from "../../errors/CustomError.js";
+import { BadRequestError } from "../../errors/CustomError.js";
 import * as focusService from "./focus.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
 
