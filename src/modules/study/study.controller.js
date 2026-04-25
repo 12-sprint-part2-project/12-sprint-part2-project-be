@@ -3,6 +3,7 @@ import asyncHandler from "../../common/middlewares/asyncHandler.js";
 import {
   AuthenticationError,
   BadRequestError,
+  InvalidPasswordError,
 } from "../../errors/CustomError.js";
 
 export const getStudies = asyncHandler(async (req, res) => {
@@ -51,11 +52,7 @@ export const createStudy = asyncHandler(async (req, res) => {
   if (!title || !theme || !password || !nickname) {
     throw new BadRequestError(
       "스터디 생성에 실패했습니다. 닉네임, 제목, 테마, 비밀번호는 필수입니다.",
-    ); //원래는 앞 문장만 정해뒀었는데 혹시모르니 뒤에 문장도 적어둠..
-    //이게 400에러를 반환하는데, 500에러는 알아서 처리되는 거겠지?
-    // asyncHandler 가 있어서 처리되는 방식인 거 같아요!
-    // asyncHandler 에서 성공이면 asyncHandler( 안에 작성된 함수 실행 )
-    // 실패면 next(err) 실행 < next(err) 은 express 약속
+    );
   }
 
   const createdStudy = await studyService.createStudy({
@@ -105,7 +102,7 @@ export const verifyPassword = asyncHandler(async (req, res) => {
   const isCorrect = await studyService.verifyPassword(studyId, password);
 
   if (!isCorrect) {
-    throw new BadRequestError("비밀번호가 올바르지 않습니다.");
+    throw new InvalidPasswordError();
   }
 
   //  sessionId에 studyId 포함
@@ -148,10 +145,6 @@ export const addEmoji = asyncHandler(async (req, res) => {
   const { emoji } = req.body;
 
   //에러 핸들링 (validation)
-  if (!studyId) {
-    throw new BadRequestError("존재하지 않는 스터디입니다.");
-  }
-
   if (!emoji) {
     throw new BadRequestError("추가할 이모지가 없습니다.");
   }

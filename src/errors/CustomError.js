@@ -55,6 +55,15 @@ export class BadRequestError extends AppError {
   }
 }
 
+export class InvalidPasswordError extends AppError {
+  constructor() {
+    super("비밀번호가 올바르지 않습니다.", {
+      status: 400,
+      code: ERROR_CODES.INVALID_PASSWORD,
+    });
+  }
+}
+
 export class AuthenticationError extends AppError {
   constructor(message = "인증이 필요합니다") {
     super(message, { status: 401, code: ERROR_CODES.UNAUTHORIZED });
