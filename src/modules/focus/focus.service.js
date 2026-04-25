@@ -2,6 +2,7 @@ import prisma from "../../lib/prisma.js";
 import {
   FocusAlreadyCompletedError,
   DuplicateFocusTitleError,
+  FocusNotFoundError,
 } from "../../errors/CustomError.js";
 
 export const getSessions = async (studyId) => {
@@ -79,6 +80,8 @@ export const updateSession = async (studyId, id, status) => {
       pausedAt: true,
     },
   });
+
+  if (!focus) throw new FocusNotFoundError();
 
   if (focus.status === "completed") throw new FocusAlreadyCompletedError();
 
