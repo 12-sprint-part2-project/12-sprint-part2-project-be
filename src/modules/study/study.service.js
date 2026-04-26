@@ -1,4 +1,5 @@
 import prisma from "../../lib/prisma.js";
+import { getTodayKST } from "../../common/utils/date.js";
 
 const countedEmojis = (emojis, limit = null) => {
   const countMap = {};
