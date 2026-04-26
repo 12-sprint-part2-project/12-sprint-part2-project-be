@@ -152,7 +152,7 @@ export const getRecentStudies = async (ids) => {
 };
 
 export const getStudyById = async (id) => {
-  const today = new Date();
+   const today = new Date();
   const day = today.getDay(); // 오늘이 속한 요일(숫자로 받음)
   const monday = new Date(today); // 오늘 날짜를 기준으로 이번 주의 월요일을 구함
   monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
