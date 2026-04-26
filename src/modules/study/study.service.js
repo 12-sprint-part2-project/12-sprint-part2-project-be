@@ -1,5 +1,5 @@
 import prisma from "../../lib/prisma.js";
-import { getTodayKST } from "../../common/utils/date.js";
+import { formatInTimeZone } from "date-fns-tz";
 
 const countedEmojis = (emojis, limit = null) => {
   const countMap = {};
@@ -153,15 +153,19 @@ export const getRecentStudies = async (ids) => {
 };
 
 export const getStudyById = async (id) => {
-  const today = new Date();
-  const day = today.getDay(); // 오늘이 속한 요일(숫자로 받음)
-  const monday = new Date(today); // 오늘 날짜를 기준으로 이번 주의 월요일을 구함
-  monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
-  monday.setHours(0, 0, 0, 0);
+  // KST 기준 오늘 날짜 문자열
+  const todayStr = formatInTimeZone(new Date(), "Asia/Seoul", "yyyy-MM-dd");
 
-  const sunday = new Date(today); // 오늘 날짜를 기준으로 이번 주의 일요일을 구함
-  sunday.setDate(monday.getDate() + 6);
-  sunday.setHours(23, 59, 59, 999);
+  // DB의 @db.Date는 UTC 자정으로 저장되므로 UTC 자정 기준으로 맞추기
+  const today = new Date(`${todayStr}T00:00:00.000Z`);
+
+  const day = today.getUTCDay();
+  const monday = new Date(today);
+  monday.setUTCDate(today.getUTCDate() - (day === 0 ? 6 : day - 1));
+
+  const sundayEnd = new Date(monday);
+  sundayEnd.setUTCDate(monday.getUTCDate() + 6);
+  sundayEnd.setUTCHours(23, 59, 59, 999);
 
   const res = await prisma.study.findUniqueOrThrow({
     where: { id },
@@ -177,7 +181,7 @@ export const getStudyById = async (id) => {
             where: {
               logDate: {
                 gte: monday,
-                lte: sunday,
+                lte: sundayEnd,
               },
             },
           },
