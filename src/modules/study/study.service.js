@@ -1,4 +1,5 @@
 import prisma from "../../lib/prisma.js";
+import { getTodayKST } from "../../common/utils/date.js";
 
 const countedEmojis = (emojis, limit = null) => {
   const countMap = {};
@@ -152,15 +153,16 @@ export const getRecentStudies = async (ids) => {
 };
 
 export const getStudyById = async (id) => {
-  const today = new Date();
-  const day = today.getDay(); // 오늘이 속한 요일(숫자로 받음)
-  const monday = new Date(today); // 오늘 날짜를 기준으로 이번 주의 월요일을 구함
-  monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
-  monday.setHours(0, 0, 0, 0);
+  // KST 기준 오늘 자정 (UTC로 저장된 값, e.g. 2026-04-26T15:00:00.000Z = KST 2026-04-27 00:00)
+  const todayKST = getTodayKST();
+  // KST 요일 계산: UTC 시간에 9시간 더해 KST 날짜 기준 요일 구함
+  const kstDayOfWeek = new Date(todayKST.getTime() + 9 * 60 * 60 * 1000).getUTCDay();
+  const daysFromMonday = kstDayOfWeek === 0 ? 6 : kstDayOfWeek - 1;
 
-  const sunday = new Date(today); // 오늘 날짜를 기준으로 이번 주의 일요일을 구함
-  sunday.setDate(monday.getDate() + 6);
-  sunday.setHours(23, 59, 59, 999);
+  // KST 이번 주 월요일 자정 (UTC)
+  const monday = new Date(todayKST.getTime() - daysFromMonday * 24 * 60 * 60 * 1000);
+  // KST 이번 주 일요일 끝 (UTC) = 월요일 + 7일 - 1ms
+  const sunday = new Date(monday.getTime() + 7 * 24 * 60 * 60 * 1000 - 1);
 
   const res = await prisma.study.findUniqueOrThrow({
     where: { id },
