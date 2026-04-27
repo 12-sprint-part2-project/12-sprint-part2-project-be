@@ -2,15 +2,10 @@ import { ERROR_CODES } from "../../errors/errorCodes.js";
 import { AppError } from "../../errors/CustomError.js";
 
 const PRISMA_ERROR_MAP = {
-  P2025: {
-    status: 404,
-    code: ERROR_CODES.NOT_FOUND,
-    message: "리소스를 찾을 수 없습니다",
-  },
   P2003: {
-    status: 404,
-    code: ERROR_CODES.NOT_FOUND,
-    message: "참조하는 리소스를 찾을 수 없습니다",
+    status: 400,
+    code: ERROR_CODES.INTERNAL_ERROR,
+    message: "참조하는 리소스가 존재하지 않습니다",
   },
   P2002: {
     status: 409,

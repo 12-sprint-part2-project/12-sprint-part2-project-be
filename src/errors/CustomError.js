@@ -6,6 +6,7 @@ export class AppError extends Error {
     { status = 500, code = ERROR_CODES.INTERNAL_ERROR } = {},
   ) {
     super(message);
+    this.name = this.constructor.name;
     this.status = status;
     this.code = code;
   }
@@ -30,6 +31,15 @@ export class HabitNotFoundError extends AppError {
   }
 }
 
+export class HabitLogNotFoundError extends AppError {
+  constructor() {
+    super("습관 기록을 찾을 수 없습니다", {
+      status: 404,
+      code: ERROR_CODES.HABIT_LOG_NOT_FOUND,
+    });
+  }
+}
+
 export class FocusNotFoundError extends AppError {
   constructor() {
     super("집중 세션을 찾을 수 없습니다", {
@@ -45,6 +55,15 @@ export class BadRequestError extends AppError {
   }
 }
 
+export class InvalidPasswordError extends AppError {
+  constructor() {
+    super("비밀번호가 올바르지 않습니다.", {
+      status: 400,
+      code: ERROR_CODES.INVALID_PASSWORD,
+    });
+  }
+}
+
 export class AuthenticationError extends AppError {
   constructor(message = "인증이 필요합니다") {
     super(message, { status: 401, code: ERROR_CODES.UNAUTHORIZED });
@@ -54,5 +73,23 @@ export class AuthenticationError extends AppError {
 export class ConflictError extends AppError {
   constructor(message = "이미 존재하는 리소스입니다") {
     super(message, { status: 409, code: ERROR_CODES.CONFLICT });
+  }
+}
+
+export class DuplicateFocusTitleError extends AppError {
+  constructor() {
+    super("이미 사용 중인 집중 세션 제목입니다.", {
+      status: 409,
+      code: ERROR_CODES.DUPLICATE_FOCUS_TITLE,
+    });
+  }
+}
+
+export class FocusAlreadyCompletedError extends AppError {
+  constructor() {
+    super("종료된 집중 상태는 변경할 수 없습니다", {
+      status: 409,
+      code: ERROR_CODES.FOCUS_ALREADY_COMPLETED,
+    });
   }
 }

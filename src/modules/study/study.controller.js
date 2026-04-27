@@ -1,30 +1,155 @@
 import * as studyService from "./study.service.js";
 import asyncHandler from "../../common/middlewares/asyncHandler.js";
+import {
+  AuthenticationError,
+  BadRequestError,
+  InvalidPasswordError,
+} from "../../errors/CustomError.js";
 
 export const getStudies = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: "TODO" });
+  const { page, limit, keyword, sortBy, order } = req.query || {};
+
+  const result = await studyService.getStudies({
+    page,
+    limit,
+    keyword,
+    sortBy,
+    order,
+  });
+
+  res.status(200).json({
+    success: true,
+    data: result.data,
+    total: result.total,
+    has_more: result.has_more,
+  });
 });
 
-export const createStudy = asyncHandler(async (req, res) => {
-  res.status(201).json({ message: "TODO" });
+export const getRecentStudies = asyncHandler(async (req, res) => {
+  const { ids } = req.query;
+  let result = [];
+
+  if (ids) {
+    const idList = ids.split(",").map((id) => Number(id));
+    result = await studyService.getRecentStudies(idList);
+  }
+
+  res.status(200).json({ success: true, data: result });
 });
 
 export const getStudyById = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: "TODO" });
+  const studyId = req.studyId;
+
+  const study = await studyService.getStudyById(studyId);
+
+  res.status(200).json({ success: true, data: study });
+});
+
+export const createStudy = asyncHandler(async (req, res) => {
+  const { nickname, title, description, theme, password } = req.body;
+
+  //에러 핸들링 (validation)
+  if (!title || !theme || !password || !nickname) {
+    throw new BadRequestError(
+      "스터디 생성에 실패했습니다. 닉네임, 제목, 테마, 비밀번호는 필수입니다.",
+    );
+  }
+
+  const createdStudy = await studyService.createStudy({
+    nickname,
+    title,
+    description,
+    theme,
+    password,
+  });
+
+  res.status(201).json({ success: true, data: createdStudy });
 });
 
 export const updateStudy = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: "TODO" });
+  const studyId = req.studyId;
+  const { title, description, theme, password, nickname } = req.body;
+
+  if (!title || !theme || !nickname) {
+    throw new BadRequestError(
+      "스터디 수정에 실패했습니다. 유효하지 않은 입력값입니다.",
+    );
+  }
+
+  const updatedStudy = await studyService.updateStudy(studyId, {
+    title,
+    description,
+    theme,
+    password,
+    nickname,
+  });
+
+  res.status(200).json({ success: true, data: updatedStudy });
 });
 
 export const deleteStudy = asyncHandler(async (req, res) => {
+  const studyId = req.studyId;
+
+  await studyService.deleteStudy(studyId);
+
   res.status(204).send();
 });
 
 export const verifyPassword = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: "TODO" });
+  const studyId = req.studyId;
+  const { password } = req.body;
+
+  const isCorrect = await studyService.verifyPassword(studyId, password);
+
+  if (!isCorrect) {
+    throw new InvalidPasswordError();
+  }
+
+  //  sessionId에 studyId 포함
+  res.status(200).json({
+    success: true,
+    data: {
+      sessionId: `${Date.now()}-${studyId}`,
+    },
+  });
+});
+
+//세션에 있는 스터디 id인지 점검
+export const checkSession = asyncHandler(async (req, res) => {
+  const studyId = req.studyId;
+  const sessionId = req.headers["x-session-id"];
+
+  if (!sessionId) {
+    throw new AuthenticationError();
+  }
+
+  // localStorage에 저장된 값이 해당 studyId를 포함하는지 확인
+  const authorizedStudyId = Number(sessionId.split("-")[1]);
+  if (authorizedStudyId !== studyId) {
+    throw new AuthenticationError();
+  }
+
+  res.status(200).json({ success: true });
+});
+
+export const getEmoji = asyncHandler(async (req, res) => {
+  const studyId = req.studyId;
+
+  const emojis = await studyService.getEmoji(studyId);
+
+  res.status(200).json({ success: true, data: emojis });
 });
 
 export const addEmoji = asyncHandler(async (req, res) => {
-  res.status(201).json({ message: "TODO" });
+  const studyId = req.studyId;
+  const { emoji } = req.body;
+
+  //에러 핸들링 (validation)
+  if (!emoji) {
+    throw new BadRequestError("추가할 이모지가 없습니다.");
+  }
+
+  const addedEmoji = await studyService.addEmoji(studyId, emoji);
+
+  res.status(201).json({ success: true, data: addedEmoji });
 });

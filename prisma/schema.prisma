@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -73,9 +73,10 @@ model HabitLog {
 model FocusSession {
   id          Int         @id @default(autoincrement())
   studyId     Int         @map("study_id")
+  title       String?     @map("title")
   startTime   DateTime    @default(now()) @map("start_time")
   endTime     DateTime    @map("end_time")
-  durationMin Int         @map("duration_min")
+  durationSec Int         @map("duration_sec") 
   pausedAt    DateTime?   @map("paused_at")
   status      FocusStatus
   earnedPoint Int         @default(0) @map("earned_point")
@@ -95,6 +96,5 @@ model Emoji {
 
   study     Study    @relation(fields: [studyId], references: [id], onDelete: Cascade)
 
-  @@unique([studyId, emoji])
   @@map("emojis")
 }
